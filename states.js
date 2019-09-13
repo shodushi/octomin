@@ -14,6 +14,7 @@ async function getPowerState() {
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
 	    var json = JSON.parse(xhr.responseText);
+	    //console.log(json);
 	    powerState.state = json.Status.Power;
 	};
 	xhr.send();
@@ -27,6 +28,7 @@ async function getConnectionState() {
 	xhr.onload = function () {
 	    var data = JSON.parse(xhr.responseText)
 		connection = data;
+		console.log("connectionstate: data:" + xhr.responseText);
 		connectionState.state = data.current.state;
 	};
 	xhr.send();
@@ -38,18 +40,11 @@ async function getPrinterState() {
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
-		console.log("rrrr: "+xhr.responseText);
-		if(xhr.responseText != null) {
-		    var data = "";
-		    try {
-		        data = JSON.parse(xhr.responseText);
-		        printerState = data.state;
-				console.log(data);
-		    } catch(e) {
-		        false;
-		    }
-			updateUI();
-		}
+	    data = JSON.parse(xhr.responseText);
+	    printer = data;
+	    console.log("printerstate: data:" + xhr.responseText);
+	    printerState = data.state;
+	
 	};
 	xhr.send();
 }

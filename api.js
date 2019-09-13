@@ -3,11 +3,13 @@ const handler = {
   set(target, key, value) {
     console.log(`Setting value ${key} as ${value}`)
     target[key] = value;
+    console.log("handler");
     updateUI();
   },
 };
 
 var connection;
+var printer;
 //var printerState;
 var files = [];
 var folders = [];
@@ -34,69 +36,57 @@ $( document ).ready(function() {
 	getPowerState();
 	getPrinterState();
 	getFiles();
-	
 })
 
 
 
 
 function updateUI() {
-	if(connection != null) {
-		if(connection.current.state == "Closed") {
-			$("#btn_connect").html("verbinden");
-			$("#btn_connect").css("background-color", "#abd03f");
-			$("#tag_btn_connect").html('aus');
-	    	$("#tag_btn_connect").attr('class', 'tag is-danger');
-		} else {
-			$("#btn_connect").html("trennen");
-			$("#btn_connect").css("background-color", "#bd3630");
-			$("#tag_btn_connect").html('an');
-	    	$("#tag_btn_connect").attr('class', 'tag is-success');
-		}
-		$("#printername").html(connection.options.printerProfiles[0].name);
-		$("#connectionstatus").html(connection.current.state);
+	if(powerState.state == 0) {
+		$("#tag_printer_power").html('aus');
+    	$("#tag_printer_power").attr('class', 'tag is-danger');
+    }
+    if(powerState.state == 1) {
+    	$("#tag_printer_power").html('an');
+    	$("#tag_printer_power").attr('class', 'tag is-success');
+    }
 
-		if(printerState.state != "Closed") {
-			$("#cardprinterstatus").css("display", "block");
-			$("#cardtools").css("display", "block");
-			$("#printerstatus").html(printerState.state.text);
-			$("#tool0tempactual").html(printerState.temperature.tool0.actual);
-			$("#bedtempactual").html(printerState.temperature.bed.actual);
-			$("#tool0temptarget").html(printerState.temperature.tool0.target);
-			$("#bedtemptarget").html(printerState.temperature.bed.target);
-		} else {
-			$("#cardprinterstatus").css("display", "none");
-			$("#cardtools").css("display", "none");
+	if(connectionState.state == "Closed") {
+		$("#tag_btn_connect").html('aus');
+    	$("#tag_btn_connect").attr('class', 'tag is-danger');
+	} else {
+		$("#tag_btn_connect").html('an');
+    	$("#tag_btn_connect").attr('class', 'tag is-success');
+	}
+
+	if(connection != null) {
+		if(connection.hasOwnProperty("options")) {
+			$("#printername").html(connection.options.printerProfiles[0].name);
+			$("#connectionstatus").html(connection.current.state);
 		}
 	}
-	if(powerState != null) {
-		if(powerState.state == 0) {
-			$("#printer_power").css("background-color", "#abd03f");
-			$("#printer_power").html('Strom an');
-			$("#tag_printer_power").html('aus');
-	    	$("#tag_printer_power").attr('class', 'tag is-danger');
-	    }
-	    if(powerState.state == 1) {
-	    	$("#printer_power").css("background-color", "#bd3630");
-	    	$("#printer_power").html('Strom aus');
-	    	$("#tag_printer_power").html('an');
-	    	$("#tag_printer_power").attr('class', 'tag is-success');
-	    }
+
+	if(connectionState.state != "Closed") {
+		$("#cardprinterstatus").css("display", "block");
+		$("#cardtools").css("display", "block");
+		$("#printerstatus").html(printer.state.text);
+		$("#tool0tempactual").html(printer.temperature.tool0.actual);
+		$("#bedtempactual").html(printer.temperature.bed.actual);
+		$("#tool0temptarget").html(printer.temperature.tool0.target);
+		$("#bedtemptarget").html(printer.temperature.bed.target);
+	} else {
+		$("#cardprinterstatus").css("display", "none");
+		$("#cardtools").css("display", "none");
 	}
-	if(lightState != null) {
-	    if(lightState.state == "OFF") {
-			$("#lightswitch").css("background-color", "#abd03f");
-			$("#lightswitch").html('Licht an');
-			$("#tag_lightswitch").html('aus');
-			$("#tag_lightswitch").attr('class', 'tag is-danger');
-	    }
-	    if(lightState.state == "ON") {
-	    	$("#lightswitch").css("background-color", "#bd3630");
-	    	$("#lightswitch").html('Licht aus');
-	    	$("#tag_lightswitch").html('an');
-	    	$("#tag_lightswitch").attr('class', 'tag is-success');
-	    }
-	}
+	
+    if(lightState.state == "OFF") {
+		$("#tag_lightswitch").html('aus');
+		$("#tag_lightswitch").attr('class', 'tag is-danger');
+    }
+    if(lightState.state == "ON") {
+    	$("#tag_lightswitch").html('an');
+    	$("#tag_lightswitch").attr('class', 'tag is-success');
+    }
 }
 
 async function powerswitch() {
@@ -104,14 +94,6 @@ async function powerswitch() {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
-	    if(xhr.responseText == '{"POWER":"ON"}') {
-	    	$("#printer_power").css("background-color", "#bd3630");
-	    	$("#printer_power").html('Strom aus');
-	    } else {
-	    	$("#printer_power").css("background-color", "#abd03f");
-			$("#printer_power").html('Strom an');
-			getPrinterState();
-	    }
 	    getPowerState();
 	};
 	xhr.send();
@@ -134,7 +116,7 @@ async function printerConnection() {
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
-	if(connection.current.state == "Closed" || connection == null) {
+	if(connectionState.state == "Closed") {
 		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;
