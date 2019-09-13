@@ -1,0 +1,121 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="css/bulma.min.css" />
+		
+		<script src="config.js" type="text/javascript"></script>
+		<script src="jquery-3.4.1.slim.min.js" type="text/javascript"></script>
+		<script src="states.js" type="text/javascript"></script>
+		<script src="api.js" type="text/javascript"></script>
+	</head>
+	<body>
+
+	<nav class="navbar" role="navigation" aria-label="main navigation">
+		<div class="navbar-brand">
+			<a class="navbar-item" href="https://bulma.io">
+				<!-- <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: Free, open source, & modern CSS framework based on Flexbox" width="112" height="28"> !-->
+				Octo^^in
+			</a>
+
+		<div id="navbarBasicExample" class="navbar-menu">
+			<div class="navbar-start" style="width: 400px;">
+				<div id="meta" class="field is-grouped is-grouped-multiline" style="margin: 14px 0px 0px 20%;">
+					<div class="control">
+						<div class="tags has-addons">
+							<span class="tag">Strom</span>
+							<a class="tag is-danger" href="#sizes" id="tag_printer_power" onclick="powerswitch()">aus</a>
+						</div>
+					</div>
+
+					<div class="control">
+						<div class="tags has-addons">
+							<span class="tag">Verbindung</span>
+							<a class="tag is-danger" href="#sizes" id="tag_btn_connect" onclick="printerConnection()">aus</a>
+						</div>
+					</div>
+
+					<div class="control">
+						<div class="tags has-addons">
+							<span class="tag">Licht</span>
+							<a class="tag is-danger" href="#sizes" id="tag_lightswitch" onclick="lightswitch()">aus</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	
+
+
+	<section class="section">
+		<div class="container">
+
+			<div class="columns">
+
+			  <div class="column is-three-quarters">
+			    <h2>Files & Folders</h2>
+			    	<table class="table is-fullwidth is-striped is-hoverable" id="filestable">
+			    		<thead>
+						    <tr>
+						      <th colspan="3">
+								<div class="buttons">
+									<span id="btn_print" class="button is-success" disabled>print</span>
+									<span id="btn_delete" class="button is-danger" disabled>delete</span>
+								</div>
+						      </th>
+						    </tr>
+						</thead>
+						<tbody id="filesbody">
+						</tbody>
+			    	</table>
+			    
+			  </div>
+
+
+			  <div class="column">
+
+				<div class="card">
+				  <div class="card-image">
+				    <figure class="image is-4by3">
+				      <img src="http://192.168.120.244:8081" alt="Placeholder image">
+				    </figure>
+				  </div>
+				  <div class="card-content">
+				    <div class="media">
+
+				      <div class="media-content">
+				        <p class="title is-4" id="printername"></p>
+				        <p class="subtitle is-6" id="connectionstatus"></p>
+				      </div>
+				    </div>
+
+				    <div class="content" id="cardprinterstatus">
+				      <p>Printerstatus: <span id="printerstatus"></span></p>
+				      <p>Tool-0 Temp: <span id="tool0tempactual"></span>&deg; C / <span id="tool0temptarget"></span>&deg; C</p>
+				      <p>Bed Temp: <span id="bedtempactual"></span>&deg; C / <span id="bedtemptarget"></span>&deg; C</p>
+				    </div>
+				  </div>
+				</div>
+
+			  </div>
+
+
+			</div>
+
+		</div>
+	</section>
+
+
+
+
+
+		<footer class="footer">
+		<div class="content has-text-centered">
+			<p>
+				<strong>Octo^^in</strong> by <a href="https://jgthms.com">CSTstudios</a>.
+			</p>
+			</div>
+		</footer>
+		
+	</body>
+</html>
