@@ -1,10 +1,21 @@
+var obj = {};
+
+const handler = {
+  set(target, key, value) {
+    console.log(`Setting value ${key} as ${value}`)
+    target[key] = value;
+    console.log("lightstate.state = "+lightState.state); // logs 10
+    updateUI();
+  },
+};
+
 var connectionState;
 var powerState;
-var lightState;
 var printerState;
 var files = [];
 var folders = [];
 var selectedfile = {};
+var lightState = new Proxy(obj, handler);
 
 $( document ).ready(function() {
 	$("<div id='rightMenu' class='accordion span4'></div>'").insertAfter( ".span8" );
@@ -23,6 +34,7 @@ $( document ).ready(function() {
 	getPowerState();
 	getPrinterState();
 	getFiles();
+	
 })
 
 
@@ -46,6 +58,7 @@ function updateUI() {
 
 		if(printerState != null) {
 			$("#cardprinterstatus").css("display", "block");
+			$("#cardtools").css("display", "block");
 			$("#printerstatus").html(printerState.state.text);
 			$("#tool0tempactual").html(printerState.temperature.tool0.actual);
 			$("#bedtempactual").html(printerState.temperature.bed.actual);
@@ -53,6 +66,7 @@ function updateUI() {
 			$("#bedtemptarget").html(printerState.temperature.bed.target);
 		} else {
 			$("#cardprinterstatus").css("display", "none");
+			$("#cardtools").css("display", "none");
 		}
 	}
 	if(powerState != null) {
@@ -96,6 +110,7 @@ async function powerswitch() {
 	    } else {
 	    	$("#printer_power").css("background-color", "#abd03f");
 			$("#printer_power").html('Strom an');
+			getPrinterState();
 	    }
 	    getPowerState();
 	};
@@ -107,7 +122,7 @@ async function lightswitch() {
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
 	xhr.onload = function () {
-	    getLightState()
+	    getLightState();
 	};
 	xhr.send();
 }
@@ -132,6 +147,7 @@ async function printerConnection() {
 	console.log(obj.toString());
 	xhr.onload = function () {
 		getConnectionState();
+		getPrinterState();
 	};
 	xhr.send(JSON.stringify(obj));
 }
@@ -235,6 +251,34 @@ async function deleteFile() {
 	xhr.send();
 }
 
+async function setExtruderTemp(temp) {
+	var url = octo_ip+"/api/printer/tool";
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	var obj = {};
+	obj.command = "target";
+	obj.targets = {"tool0": temp};
+	xhr.onload = function () {
+		getPrinterState();
+	};
+	xhr.send(JSON.stringify(obj));
+}
+async function setBedTemp(temp) {
+	var url = octo_ip+"/api/printer/bed";
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	var obj = {};
+	obj.command = "target";
+	obj.target = temp;
+	xhr.onload = function () {
+		getPrinterState();
+	};
+	xhr.send(JSON.stringify(obj));
+}
 
 
 

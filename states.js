@@ -3,8 +3,8 @@ async function getLightState() {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
-	    lightState = JSON.parse(xhr.responseText);
-	    updateUI();
+	    var json = JSON.parse(xhr.responseText);
+	    lightState.state = json.state;
 	};
 	xhr.send();
 }

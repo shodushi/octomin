@@ -22,21 +22,21 @@
 					<div class="control">
 						<div class="tags has-addons">
 							<span class="tag">Strom</span>
-							<a class="tag is-danger" href="#sizes" id="tag_printer_power" onclick="powerswitch()">aus</a>
+							<a class="tag is-danger" id="tag_printer_power" onclick="powerswitch()">aus</a>
 						</div>
 					</div>
 
 					<div class="control">
 						<div class="tags has-addons">
 							<span class="tag">Verbindung</span>
-							<a class="tag is-danger" href="#sizes" id="tag_btn_connect" onclick="printerConnection()">aus</a>
+							<a class="tag is-danger" id="tag_btn_connect" onclick="printerConnection()">aus</a>
 						</div>
 					</div>
 
 					<div class="control">
 						<div class="tags has-addons">
 							<span class="tag">Licht</span>
-							<a class="tag is-danger" href="#sizes" id="tag_lightswitch" onclick="lightswitch()">aus</a>
+							<a class="tag is-danger" id="tag_lightswitch" onclick="lightswitch()">aus</a>
 						</div>
 					</div>
 				</div>
@@ -79,7 +79,7 @@
 				<div class="card">
 				  <div class="card-image">
 				    <figure class="image is-4by3">
-				      <img src="http://192.168.120.244:8081" alt="Placeholder image">
+				      <img src="http://192.168.120.244:8081" alt="Printer image">
 				    </figure>
 				  </div>
 				  <div class="card-content">
@@ -95,6 +95,23 @@
 				      <p>Printerstatus: <span id="printerstatus"></span></p>
 				      <p>Tool-0 Temp: <span id="tool0tempactual"></span>&deg; C / <span id="tool0temptarget"></span>&deg; C</p>
 				      <p>Bed Temp: <span id="bedtempactual"></span>&deg; C / <span id="bedtemptarget"></span>&deg; C</p>
+				    </div>
+
+				    <div class="content" id="cardtools" style="display: none;">
+						<p>Extruder:</p>
+						<div class="buttons are-small">
+						  <a class="button" onclick="setExtruderTemp(0)">0 &deg; C</a>
+						  <a class="button" onclick="setExtruderTemp(180)">180 &deg; C</a>
+						  <a class="button" onclick="setExtruderTemp(200)">200 &deg; C</a>
+						  <a class="button" onclick="setExtruderTemp(240)">240 &deg; C</a>
+						</div>
+						<p>Bed:</p>
+						<div class="buttons are-small">
+						  <a class="button" onclick="setBedTemp(0)">0 &deg; C</a>
+						  <a class="button" onclick="setBedTemp(40)">40 &deg; C</a>
+						  <a class="button" onclick="setBedTemp(60)">60 &deg; C</a>
+						  <a class="button" onclick="setBedTemp(80)">80 &deg; C</a>
+						</div>
 				    </div>
 				  </div>
 				</div>
