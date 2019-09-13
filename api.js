@@ -1,21 +1,21 @@
 var obj = {};
-
 const handler = {
   set(target, key, value) {
     console.log(`Setting value ${key} as ${value}`)
     target[key] = value;
-    console.log("lightstate.state = "+lightState.state); // logs 10
     updateUI();
   },
 };
 
-var connectionState;
-var powerState;
-var printerState;
+var connection;
+//var printerState;
 var files = [];
 var folders = [];
 var selectedfile = {};
 var lightState = new Proxy(obj, handler);
+var powerState = new Proxy(obj, handler);
+var connectionState = new Proxy(obj, handler);
+var printerState = new Proxy(obj, handler);
 
 $( document ).ready(function() {
 	$("<div id='rightMenu' class='accordion span4'></div>'").insertAfter( ".span8" );
@@ -41,8 +41,8 @@ $( document ).ready(function() {
 
 
 function updateUI() {
-	if(connectionState != null) {
-		if(connectionState.current.state == "Closed") {
+	if(connection != null) {
+		if(connection.current.state == "Closed") {
 			$("#btn_connect").html("verbinden");
 			$("#btn_connect").css("background-color", "#abd03f");
 			$("#tag_btn_connect").html('aus');
@@ -53,10 +53,10 @@ function updateUI() {
 			$("#tag_btn_connect").html('an');
 	    	$("#tag_btn_connect").attr('class', 'tag is-success');
 		}
-		$("#printername").html(connectionState.options.printerProfiles[0].name);
-		$("#connectionstatus").html(connectionState.current.state);
+		$("#printername").html(connection.options.printerProfiles[0].name);
+		$("#connectionstatus").html(connection.current.state);
 
-		if(printerState != null) {
+		if(printerState.state != "Closed") {
 			$("#cardprinterstatus").css("display", "block");
 			$("#cardtools").css("display", "block");
 			$("#printerstatus").html(printerState.state.text);
@@ -70,13 +70,13 @@ function updateUI() {
 		}
 	}
 	if(powerState != null) {
-		if(powerState.Status.Power == 0) {
+		if(powerState.state == 0) {
 			$("#printer_power").css("background-color", "#abd03f");
 			$("#printer_power").html('Strom an');
 			$("#tag_printer_power").html('aus');
 	    	$("#tag_printer_power").attr('class', 'tag is-danger');
 	    }
-	    if(powerState.Status.Power == 1) {
+	    if(powerState.state == 1) {
 	    	$("#printer_power").css("background-color", "#bd3630");
 	    	$("#printer_power").html('Strom aus');
 	    	$("#tag_printer_power").html('an');
@@ -134,7 +134,7 @@ async function printerConnection() {
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
-	if(connectionState.current.state == "Closed" || connectionState == null) {
+	if(connection.current.state == "Closed" || connection == null) {
 		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;
@@ -184,10 +184,15 @@ async function listFiles() {
 	}
 	if(files.length > 0) {
 		jQuery.each(files, function(index, value) {
-			var img = value.refs.download.replace(".gcode", ".png");
-			var tstamp = new Date(value.date*1000);
-			var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
-            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" onerror="this.src=\'img/placeholder.png\'"></figure></td><td>'+value.display+'</td><td>'+date+'</td></tr>');
+			var img;
+			if(value.refs.download != null) {
+				if(value.refs.download.includes(".gcode")) {
+					img = value.refs.download.replace(".gcode", ".png"); 
+				}
+				var tstamp = new Date(value.date*1000);
+				var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
+	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" onerror="this.src=\'img/placeholder.png\'"></figure></td><td>'+value.display+'</td><td>'+date+'</td></tr>');
+			}
         });
 	}
 }
