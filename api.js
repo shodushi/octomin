@@ -23,7 +23,6 @@ $( document ).ready(function() {
 	getPowerState();
 	getPrinterState();
 	getFiles();
-	listFiles();
 })
 
 
@@ -144,6 +143,8 @@ async function getFiles() {
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
+		folders = [];
+		files = [];
 	    var data = JSON.parse(xhr.responseText)
 		jQuery.each(data.files, function(index, value) {
             if(value.type == "folder") {
@@ -154,18 +155,18 @@ async function getFiles() {
         });
 		console.log(data);
 		listFiles();
-		updateUI();
 	};
 	xhr.send();
 }
 
 async function listFiles() {
-	if(folders != null) {
+	$('#filestable > tbody').empty();
+	if(folders.length > 0) {
 		jQuery.each(folders, function(index, value) {
             $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this,{ display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\' } })"><td><span class="icon">&#128193;</span></td><td>'+value.display+'</td><td></td></tr>');
         });
 	}
-	if(files != null) {
+	if(files.length > 0) {
 		jQuery.each(files, function(index, value) {
 			var img = value.refs.download.replace(".gcode", ".png");
 			var tstamp = new Date(value.date*1000);
@@ -183,11 +184,12 @@ function selectFile(selector, file) {
 		$("#fileoperations span").attr("disabled", true);
 	} else {
 		$("#fileoperations span").removeAttr("disabled");
+		$('#btn_cancel').attr("disabled", true);
 	}
 }
 
 
-async function loadFile() {
+async function loadprintFile(print) {
 	var url = octo_ip+"/api/files/local/"+selectedfile.display;
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
@@ -195,14 +197,43 @@ async function loadFile() {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
 	obj.command = "select";
-	obj.print = false;
+	obj.print = print;
 	console.log(obj.toString());
 	xhr.onload = function () {
-		
+		if(print) {
+			$('#btn_cancel').attr("disabled", false);
+		}
 	};
 	xhr.send(JSON.stringify(obj));
 }
 
+async function cancelJob() {
+	var url = octo_ip+"/api/job";
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	var obj = {};
+	obj.command = "cancel";
+	xhr.onload = function () {
+	};
+	updateUI();
+	xhr.send(JSON.stringify(obj));
+}
+
+async function deleteFile() {
+	var url = octo_ip+"/api/files/local/"+selectedfile.display;
+	var xhr = new XMLHttpRequest();
+	xhr.open("DELETE", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	xhr.onload = function () {
+		selectedfile = null;
+		$("#fileoperations span").attr("disabled", true);
+		getFiles();
+	};
+	xhr.send();
+}
 
 
 
