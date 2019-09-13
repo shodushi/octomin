@@ -180,16 +180,28 @@ function selectFile(selector, file) {
 	$(selector).addClass("is-selected");
 	selectedfile = file;
 	if(file.type == "folder") {
-		$("#btn_print").attr("disabled", true);
-		$("#btn_delete").attr("disabled", true);
+		$("#fileoperations span").attr("disabled", true);
 	} else {
-		$("#btn_print").removeAttr("disabled");
-		$("#btn_delete").removeAttr("disabled");
+		$("#fileoperations span").removeAttr("disabled");
 	}
 }
 
 
-
+async function loadFile() {
+	var url = octo_ip+"/api/files/local/"+selectedfile.display;
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	var obj = {};
+	obj.command = "select";
+	obj.print = false;
+	console.log(obj.toString());
+	xhr.onload = function () {
+		
+	};
+	xhr.send(JSON.stringify(obj));
+}
 
 
 
