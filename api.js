@@ -1,63 +1,42 @@
-
-const powerhandler = {
-  get: function(obj, prop) {
-    console.log('A value has been accessed');
-    return obj[prop];
-  },
-  set: function(obj, prop, value) {
-    console.log(`${obj} ${prop} is being set to ${value}`);
-    updateUI("power", prop, value);
-  }
-}
-
-const connectionhandler = {
-  get: function(obj, prop) {
-    console.log('A value has been accessed');
-    return obj[prop];
-  },
-  set: function(obj, prop, value) {
-    console.log(`${obj} ${prop} is being set to ${value}`);
-    updateUI("connection", prop, value);
-  }
-}
-
-const printerhandler = {
-  get: function(obj, prop) {
-    console.log('A value has been accessed');
-    return obj[prop];
-  },
-  set: function(obj, prop, value) {
-    console.log(`${obj} ${prop} is being set to ${value}`);
-    updateUI("printer", prop, value);
-  }
-}
-
-const lighthandler = {
-  get: function(obj, prop) {
-    console.log('A value has been accessed');
-    return obj[prop];
-  },
-  set: function(obj, prop, value) {
-    console.log(`${obj} ${prop} is being set to ${value}`);
-    updateUI("light", prop, value);
-  }
-}
-
 var powerState = {};
-var connectionState = {};
-var printerState = {};
+var powerState_proxy = new Proxy(powerState, {
+  set: function(obj, prop, value) {
+    obj[prop] = value;
+    updateUI();
+    return true;
+  },
+});
+
 var lightState = {};
+var lightState_proxy = new Proxy(lightState, {
+  set: function(obj, prop, value) {
+    obj[prop] = value;
+    console.log("setter");
+    updateUI();
+    return true;
+  },
+});
+var connectionState = {};
+var connectionState_proxy = new Proxy(connectionState, {
+  set: function(obj, prop, value) {
+    obj[prop] = value;
+    updateUI();
+    return true;
+  },
+});
+var printerState = {};
+var printerState_proxy = new Proxy(printerState, {
+  set: function(obj, prop, value) {
+    obj[prop] = value;
+    updateUI();
+    return true;
+  },
+});
+
 var selectedfile = {};
 //var printerState;
 var files = [];
 var folders = [];
-var power = new Proxy(powerState, powerhandler);
-var connection = new Proxy(connectionState, connectionhandler);
-var printer = new Proxy(printerState, printerhandler);
-var light = new Proxy(lightState, lighthandler);
-
-var connectionDetail = {};
-var printerDetail = {};
 
 
 $( document ).ready(function() {
@@ -71,66 +50,55 @@ $( document ).ready(function() {
 
 
 
-function updateUI(cat, variable, value) {
-	//alert(cat+ variable+ value);
-	if(cat == "power") {
-		if(variable == "state" && value == 0) {
-			$("#tag_printer_power").html('aus');
-	    	$("#tag_printer_power").attr('class', 'tag is-danger');
-	    }
-	    if(variable == "state" && value == 1) {
-	    	$("#tag_printer_power").html('an');
-	    	$("#tag_printer_power").attr('class', 'tag is-success');
-	    }
+function updateUI() {
+	console.log("updateUI");
+	
+	console.log("printerState");
+	console.log(printerState);
+
+
+	if(powerState.state == 0) {
+		$("#tag_printer_power").html('aus');
+    	$("#tag_printer_power").attr('class', 'tag is-danger');
+    }
+    if(powerState.state == 1) {
+    	$("#tag_printer_power").html('an');
+    	$("#tag_printer_power").attr('class', 'tag is-success');
+    }
+
+	if(connectionState.state == "Closed" || connectionState.state == null) {
+		$("#tag_btn_connect").html('aus');
+    	$("#tag_btn_connect").attr('class', 'tag is-danger');
+	} else {
+		$("#tag_btn_connect").html('an');
+    	$("#tag_btn_connect").attr('class', 'tag is-success');
+	
+	}
+	$("#printername").html(connectionState.printerName);
+	$("#connectionstatus").html(connectionState.state);
+
+
+	if(printerState.state == "Closed" || printerState.state == null) {
+		$("#cardprinterstatus").css("display", "none");
+		$("#cardtools").css("display", "none");
+	} else {
+		$("#cardprinterstatus").css("display", "block");
+		$("#cardtools").css("display", "block");
+		$("#printerstatus").html(printerState.state.text);
+		$("#tool0tempactual").html(printerState.temperature.tool0.actual);
+		$("#bedtempactual").html(printerState.temperature.bed.actual);
+		$("#tool0temptarget").html(printerState.temperature.tool0.target);
+		$("#bedtemptarget").html(printerState.temperature.bed.target);
 	}
 
-
-	if(cat == "connection") {
-		if(variable == "state") {
-			if(value == "Closed") {
-				$("#tag_btn_connect").html('aus');
-		    	$("#tag_btn_connect").attr('class', 'tag is-danger');
-			} else {
-				$("#tag_btn_connect").html('an');
-		    	$("#tag_btn_connect").attr('class', 'tag is-success');
-
-		    	if(connectionDetail.hasOwnProperty("options")) {
-					$("#printername").html(connectionDetail.options.printerProfiles[0].name);
-					$("#connectionstatus").html(connectionDetail.current.state);
-				}
-			}
-		}
-
-		
-	}
-
-	if(cat == "connection") {
-		if(variable == "state") {
-			if(value == "Closed") {
-				$("#cardprinterstatus").css("display", "none");
-				$("#cardtools").css("display", "none");
-			} else {
-				$("#cardprinterstatus").css("display", "block");
-				$("#cardtools").css("display", "block");
-				$("#printerstatus").html(printerDetail.state.text);
-				$("#tool0tempactual").html(printerDetail.temperature.tool0.actual);
-				$("#bedtempactual").html(printerDetail.temperature.bed.actual);
-				$("#tool0temptarget").html(printerDetail.temperature.tool0.target);
-				$("#bedtemptarget").html(printerDetail.temperature.bed.target);
-			}
-		}
-	}
-
-    if(cat == "light") {
-		if(variable == "state" && value == "OFF") {
-			$("#tag_lightswitch").html('aus');
-			$("#tag_lightswitch").attr('class', 'tag is-danger');
-	    }
-	    if(variable == "state" && value == "ON") {
-	    	$("#tag_lightswitch").html('an');
-	    	$("#tag_lightswitch").attr('class', 'tag is-success');
-	    }
-	}
+	if(lightState.state == "OFF") {
+		$("#tag_lightswitch").html('aus');
+		$("#tag_lightswitch").attr('class', 'tag is-danger');
+    }
+    if(lightState.state == "ON") {
+    	$("#tag_lightswitch").html('an');
+    	$("#tag_lightswitch").attr('class', 'tag is-success');
+    }
 }
 
 async function powerswitch() {
@@ -160,8 +128,7 @@ async function printerConnection() {
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
-	var btnstate = document.getElementById("tag_btn_connect").className;
-	if(btnstate.includes("is-danger")) {
+	if(connectionState.state != "Connected") {
 		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;

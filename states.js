@@ -4,9 +4,9 @@ async function getLightState() {
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
-		console.log(xhr.responseText);
+		//console.log(xhr.responseText);
 	    var json = JSON.parse(xhr.responseText);
-	    light.state = json.state;
+	    lightState_proxy.state = json.state;
 	};
 	xhr.send();
 }
@@ -16,7 +16,7 @@ async function getPowerState() {
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
 	    var json = JSON.parse(xhr.responseText);
-	    power.state = json.Status.Power;
+	    powerState_proxy.state = json.Status.Power;
 	};
 	xhr.send();
 }
@@ -29,8 +29,8 @@ async function getConnectionState() {
 	xhr.onload = function () {
 		//console.log(xhr.responseText);
 	    var data = JSON.parse(xhr.responseText)
-		connection.state = data.current.state;
-		connectionDetail = data;
+		connectionState_proxy.state = data.current.state;
+		connectionState_proxy.printerName = data.options.printerProfiles[0].name;
 	};
 	xhr.send();
 }
@@ -43,8 +43,8 @@ async function getPrinterState() {
 	xhr.onload = function () {
 	    data = JSON.parse(xhr.responseText);
 	    console.log(xhr.responseText);
-	    printer.state = data.state.text;
-	    printerDetail = data;
+	    printerState_proxy.state = data.state.text;
+	    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
 	};
 	xhr.send();
 }
