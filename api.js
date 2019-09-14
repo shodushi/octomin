@@ -1,36 +1,66 @@
-var obj = {};
-const handler = {
-  set(target, key, value) {
-    console.log(`Setting value ${key} as ${value}`)
-    target[key] = value;
-    console.log("handler");
-    updateUI();
-  },
-};
 
-var connection;
-var printer;
+const powerhandler = {
+  get: function(obj, prop) {
+    console.log('A value has been accessed');
+    return obj[prop];
+  },
+  set: function(obj, prop, value) {
+    console.log(`${obj} ${prop} is being set to ${value}`);
+    updateUI("power", prop, value);
+  }
+}
+
+const connectionhandler = {
+  get: function(obj, prop) {
+    console.log('A value has been accessed');
+    return obj[prop];
+  },
+  set: function(obj, prop, value) {
+    console.log(`${obj} ${prop} is being set to ${value}`);
+    updateUI("connection", prop, value);
+  }
+}
+
+const printerhandler = {
+  get: function(obj, prop) {
+    console.log('A value has been accessed');
+    return obj[prop];
+  },
+  set: function(obj, prop, value) {
+    console.log(`${obj} ${prop} is being set to ${value}`);
+    updateUI("printer", prop, value);
+  }
+}
+
+const lighthandler = {
+  get: function(obj, prop) {
+    console.log('A value has been accessed');
+    return obj[prop];
+  },
+  set: function(obj, prop, value) {
+    console.log(`${obj} ${prop} is being set to ${value}`);
+    updateUI("light", prop, value);
+  }
+}
+
+var powerState = {};
+var connectionState = {};
+var printerState = {};
+var lightState = {};
+var selectedfile = {};
 //var printerState;
 var files = [];
 var folders = [];
-var selectedfile = {};
-var lightState = new Proxy(obj, handler);
-var powerState = new Proxy(obj, handler);
-var connectionState = new Proxy(obj, handler);
-var printerState = new Proxy(obj, handler);
+var power = new Proxy(powerState, powerhandler);
+var connection = new Proxy(connectionState, connectionhandler);
+var printer = new Proxy(printerState, printerhandler);
+var light = new Proxy(lightState, lighthandler);
+
+var connectionDetail = {};
+var printerDetail = {};
+
 
 $( document ).ready(function() {
-	$("<div id='rightMenu' class='accordion span4'></div>'").insertAfter( ".span8" );
-	$("#temp").detach().appendTo('#rightMenu');
-	//$("#control_link").attr("class", " ");
-	//$("#tab_plugin_filemanager_link").attr('class', 'active');
-	//$("#tab_plugin_filemanager_link").attr('data-bind', 'visible:visible');
-	//$("#tab_plugin_filemanager_link").insertBefore("#temp_link");
-	//$( "li" ).remove( "#temp_link" );
-
-	$('<button class="btn btn-block" id="printer_power" data-bind="click: powerswitch, enable: loginState.isUser()">Strom an</button>').insertBefore("#printer_connect");
-	$('<button class="btn btn-block" id="lightswitch" data-bind="click: lightswitch, enable: loginState.isUser()">Licht an</button>').insertBefore("#printer_connect");
-	
 	getConnectionState();
 	getLightState();
 	getPowerState();
@@ -41,52 +71,66 @@ $( document ).ready(function() {
 
 
 
-function updateUI() {
-	if(powerState.state == 0) {
-		$("#tag_printer_power").html('aus');
-    	$("#tag_printer_power").attr('class', 'tag is-danger');
-    }
-    if(powerState.state == 1) {
-    	$("#tag_printer_power").html('an');
-    	$("#tag_printer_power").attr('class', 'tag is-success');
-    }
-
-	if(connectionState.state == "Closed") {
-		$("#tag_btn_connect").html('aus');
-    	$("#tag_btn_connect").attr('class', 'tag is-danger');
-	} else {
-		$("#tag_btn_connect").html('an');
-    	$("#tag_btn_connect").attr('class', 'tag is-success');
+function updateUI(cat, variable, value) {
+	//alert(cat+ variable+ value);
+	if(cat == "power") {
+		if(variable == "state" && value == 0) {
+			$("#tag_printer_power").html('aus');
+	    	$("#tag_printer_power").attr('class', 'tag is-danger');
+	    }
+	    if(variable == "state" && value == 1) {
+	    	$("#tag_printer_power").html('an');
+	    	$("#tag_printer_power").attr('class', 'tag is-success');
+	    }
 	}
 
-	if(connection != null) {
-		if(connection.hasOwnProperty("options")) {
-			$("#printername").html(connection.options.printerProfiles[0].name);
-			$("#connectionstatus").html(connection.current.state);
+
+	if(cat == "connection") {
+		if(variable == "state") {
+			if(value == "Closed") {
+				$("#tag_btn_connect").html('aus');
+		    	$("#tag_btn_connect").attr('class', 'tag is-danger');
+			} else {
+				$("#tag_btn_connect").html('an');
+		    	$("#tag_btn_connect").attr('class', 'tag is-success');
+
+		    	if(connectionDetail.hasOwnProperty("options")) {
+					$("#printername").html(connectionDetail.options.printerProfiles[0].name);
+					$("#connectionstatus").html(connectionDetail.current.state);
+				}
+			}
+		}
+
+		
+	}
+
+	if(cat == "connection") {
+		if(variable == "state") {
+			if(value == "Closed") {
+				$("#cardprinterstatus").css("display", "none");
+				$("#cardtools").css("display", "none");
+			} else {
+				$("#cardprinterstatus").css("display", "block");
+				$("#cardtools").css("display", "block");
+				$("#printerstatus").html(printerDetail.state.text);
+				$("#tool0tempactual").html(printerDetail.temperature.tool0.actual);
+				$("#bedtempactual").html(printerDetail.temperature.bed.actual);
+				$("#tool0temptarget").html(printerDetail.temperature.tool0.target);
+				$("#bedtemptarget").html(printerDetail.temperature.bed.target);
+			}
 		}
 	}
 
-	if(connectionState.state != "Closed") {
-		$("#cardprinterstatus").css("display", "block");
-		$("#cardtools").css("display", "block");
-		$("#printerstatus").html(printer.state.text);
-		$("#tool0tempactual").html(printer.temperature.tool0.actual);
-		$("#bedtempactual").html(printer.temperature.bed.actual);
-		$("#tool0temptarget").html(printer.temperature.tool0.target);
-		$("#bedtemptarget").html(printer.temperature.bed.target);
-	} else {
-		$("#cardprinterstatus").css("display", "none");
-		$("#cardtools").css("display", "none");
+    if(cat == "light") {
+		if(variable == "state" && value == "OFF") {
+			$("#tag_lightswitch").html('aus');
+			$("#tag_lightswitch").attr('class', 'tag is-danger');
+	    }
+	    if(variable == "state" && value == "ON") {
+	    	$("#tag_lightswitch").html('an');
+	    	$("#tag_lightswitch").attr('class', 'tag is-success');
+	    }
 	}
-	
-    if(lightState.state == "OFF") {
-		$("#tag_lightswitch").html('aus');
-		$("#tag_lightswitch").attr('class', 'tag is-danger');
-    }
-    if(lightState.state == "ON") {
-    	$("#tag_lightswitch").html('an');
-    	$("#tag_lightswitch").attr('class', 'tag is-success');
-    }
 }
 
 async function powerswitch() {
@@ -116,7 +160,8 @@ async function printerConnection() {
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
-	if(connectionState.state == "Closed") {
+	var btnstate = document.getElementById("tag_btn_connect").className;
+	if(btnstate.includes("is-danger")) {
 		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;
@@ -126,7 +171,7 @@ async function printerConnection() {
 	} else {
 		obj.command = "disconnect";
 	}
-	console.log(obj.toString());
+	//console.log(obj.toString());
 	xhr.onload = function () {
 		getConnectionState();
 		getPrinterState();

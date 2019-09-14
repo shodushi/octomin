@@ -1,10 +1,12 @@
 async function getLightState() {
+	console.log("getlightstate called");
 	var url = cors_proxy+"/"+led_ip+"/light/3d_drucker_led/state";
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
+		console.log(xhr.responseText);
 	    var json = JSON.parse(xhr.responseText);
-	    lightState.state = json.state;
+	    light.state = json.state;
 	};
 	xhr.send();
 }
@@ -14,8 +16,7 @@ async function getPowerState() {
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
 	    var json = JSON.parse(xhr.responseText);
-	    //console.log(json);
-	    powerState.state = json.Status.Power;
+	    power.state = json.Status.Power;
 	};
 	xhr.send();
 }
@@ -26,10 +27,10 @@ async function getConnectionState() {
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
+		//console.log(xhr.responseText);
 	    var data = JSON.parse(xhr.responseText)
-		connection = data;
-		console.log("connectionstate: data:" + xhr.responseText);
-		connectionState.state = data.current.state;
+		connection.state = data.current.state;
+		connectionDetail = data;
 	};
 	xhr.send();
 }
@@ -41,10 +42,9 @@ async function getPrinterState() {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
 	    data = JSON.parse(xhr.responseText);
-	    printer = data;
-	    console.log("printerstate: data:" + xhr.responseText);
-	    printerState = data.state;
-	
+	    console.log(xhr.responseText);
+	    printer.state = data.state.text;
+	    printerDetail = data;
 	};
 	xhr.send();
 }
