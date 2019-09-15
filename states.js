@@ -38,9 +38,13 @@ async function getPrinterState() {
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
-	    data = JSON.parse(xhr.responseText);
-	    printerState_proxy.state = data.state.text;
-	    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
+		try {
+			data = JSON.parse(xhr.responseText);
+		    printerState_proxy.state = data.state.text;
+		    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
+		} catch (e) {
+			console.log("Oh well, but whatever...");
+		}
 	};
 	xhr.send();
 }

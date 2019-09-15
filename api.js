@@ -39,7 +39,7 @@ var folders = [];
 
 
 $( document ).ready(function() {
-	getConnectionState(this);
+	getConnectionState();
 	getLightState();
 	getPowerState();
 	getPrinterState();
@@ -136,8 +136,8 @@ async function printerConnection() {
 	console.log(obj);
 	xhr.onload = function () {
 		if(obj.command == "disconnect" && xhr.status == 204) {
-			connectionState_proxy.state = "Closed";
-			printerState_proxy.state = "Closed";
+			connectionState.state = "Closed";
+			printerState.state = "Closed";
 		} else {
 			tryConnectionState(0, obj.command);
 		}
