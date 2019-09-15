@@ -1,10 +1,8 @@
 async function getLightState() {
-	console.log("getlightstate called");
 	var url = cors_proxy+"/"+led_ip+"/light/3d_drucker_led/state";
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.onload = function () {
-		//console.log(xhr.responseText);
 	    var json = JSON.parse(xhr.responseText);
 	    lightState_proxy.state = json.state;
 	};
@@ -27,7 +25,6 @@ async function getConnectionState() {
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
-		//console.log(xhr.responseText);
 	    var data = JSON.parse(xhr.responseText)
 		connectionState_proxy.state = data.current.state;
 		connectionState_proxy.printerName = data.options.printerProfiles[0].name;
@@ -42,7 +39,6 @@ async function getPrinterState() {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
 	    data = JSON.parse(xhr.responseText);
-	    console.log(xhr.responseText);
 	    printerState_proxy.state = data.state.text;
 	    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
 	};

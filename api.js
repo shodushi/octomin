@@ -11,7 +11,6 @@ var lightState = {};
 var lightState_proxy = new Proxy(lightState, {
   set: function(obj, prop, value) {
     obj[prop] = value;
-    console.log("setter");
     updateUI();
     return true;
   },
@@ -40,7 +39,7 @@ var folders = [];
 
 
 $( document ).ready(function() {
-	getConnectionState();
+	getConnectionState(this);
 	getLightState();
 	getPowerState();
 	getPrinterState();
@@ -51,12 +50,6 @@ $( document ).ready(function() {
 
 
 function updateUI() {
-	console.log("updateUI");
-	
-	console.log("printerState");
-	console.log(printerState);
-
-
 	if(powerState.state == 0) {
 		$("#tag_printer_power").html('aus');
     	$("#tag_printer_power").attr('class', 'tag is-danger');
@@ -85,10 +78,12 @@ function updateUI() {
 		$("#cardprinterstatus").css("display", "block");
 		$("#cardtools").css("display", "block");
 		$("#printerstatus").html(printerState.state.text);
-		$("#tool0tempactual").html(printerState.temperature.tool0.actual);
-		$("#bedtempactual").html(printerState.temperature.bed.actual);
-		$("#tool0temptarget").html(printerState.temperature.tool0.target);
-		$("#bedtemptarget").html(printerState.temperature.bed.target);
+		if(printerState.temperature != null) {
+			$("#tool0tempactual").html(printerState.temperature.tool0.actual);
+			$("#bedtempactual").html(printerState.temperature.bed.actual);
+			$("#tool0temptarget").html(printerState.temperature.tool0.target);
+			$("#bedtemptarget").html(printerState.temperature.bed.target);
+		}
 	}
 
 	if(lightState.state == "OFF") {
@@ -128,7 +123,7 @@ async function printerConnection() {
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
-	if(connectionState.state != "Connected") {
+	if(connectionState.state == "Closed") {
 		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;
@@ -138,15 +133,40 @@ async function printerConnection() {
 	} else {
 		obj.command = "disconnect";
 	}
-	//console.log(obj.toString());
+	console.log(obj);
 	xhr.onload = function () {
-		getConnectionState();
-		getPrinterState();
+		if(obj.command == "disconnect" && xhr.status == 204) {
+			connectionState_proxy.state = "Closed";
+			printerState_proxy.state = "Closed";
+		} else {
+			tryConnectionState(0, obj.command);
+		}
 	};
 	xhr.send(JSON.stringify(obj));
 }
 
-
+async function tryConnectionState(tries, command) {
+	if(command == "connect") {
+		if(printerState.state == null || printerState.state == "Closed") {
+			if(tries < 5) {
+				setTimeout(function(){
+					getConnectionState();
+					tries++;
+					setTimeout(function(){
+						getPrinterState();
+					}, 3000);
+					tryConnectionState(tries, command);
+				}, 3000);
+			}
+		} else {
+			getConnectionState();
+			getPrinterState();
+		}
+	} else {
+		getConnectionState();
+		getPrinterState();
+	}
+}
 async function getFiles() {
 	var url = octo_ip+"/api/files?recursive=true";
 	var xhr = new XMLHttpRequest();
@@ -163,7 +183,6 @@ async function getFiles() {
             	files.push(value);
             }
         });
-		console.log(data);
 		listFiles();
 	};
 	xhr.send();
@@ -213,7 +232,6 @@ async function loadprintFile(print) {
 	var obj = {};
 	obj.command = "select";
 	obj.print = print;
-	console.log(obj.toString());
 	xhr.onload = function () {
 		if(print) {
 			$('#btn_cancel').attr("disabled", false);
