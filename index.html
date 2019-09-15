@@ -150,6 +150,7 @@
 	    	this.on("sending", function() {
 				//alert("sending");
 				$("#dropzoneProgress").css("display", "block");
+				$(".dz-preview").css("display", "none");
 			});
 			this.on("success", function() {
 				$("#dropzoneProgress").css("display", "none");
