@@ -212,7 +212,7 @@ async function listFiles() {
 				}
 				var tstamp = new Date(value.date*1000);
 				var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
-	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'</td></tr>');
+	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
 			}
         });
 	}
@@ -233,11 +233,15 @@ function zoomOut(id) {
 
 function selectFile(selector, file) {
 	$("#filestable tr").removeClass("is-selected");
+	$(".file_buttons span").css("display", "none");
 	$(selector).addClass("is-selected");
 	selectedfile = file;
 	if(file.type == "folder") {
 		$("#fileoperations span").attr("disabled", true);
 	} else {
+		imgid = file.display.replace(".", "");
+		$("#fb_"+imgid+" span").css("display", "block");
+		$("#fb_"+imgid+" span").removeAttr("disabled");
 		$("#fileoperations span").removeAttr("disabled");
 		$('#btn_cancel').attr("disabled", true);
 	}

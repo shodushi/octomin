@@ -15,9 +15,11 @@
 #dropzoneProgress .imgContainer { vertical-align: middle; }
 #dropzoneProgress .textContainer { display: inline-block; }
 
-
+tr.is-selected {
+  background-color: #c9ffed !important;
+  color: black !important;
+}
 .thumb {
-  background-image: url('/plugin/gbrowser/static/img/placeholder.png');
   background-repeat: no-repeat;
   width: auto;
   height: auto;
@@ -37,4 +39,12 @@
   top: -128px;
   left: 242px;
   background-color: white;
+}
+.file_buttons {
+  z-index: 800;
+  margin: 10px 0px 0px 0px;
+}
+.file_buttons span {
+  display: none;
+  margin: 5px 5px 0px 5px;
 }
