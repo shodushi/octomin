@@ -1,41 +1,7 @@
-var powerState = {};
-var powerState_proxy = new Proxy(powerState, {
-  set: function(obj, prop, value) {
-    obj[prop] = value;
-    updateUI();
-    return true;
-  },
-});
-
-var lightState = {};
-var lightState_proxy = new Proxy(lightState, {
-  set: function(obj, prop, value) {
-    obj[prop] = value;
-    updateUI();
-    return true;
-  },
-});
-var connectionState = {};
-var connectionState_proxy = new Proxy(connectionState, {
-  set: function(obj, prop, value) {
-    obj[prop] = value;
-    updateUI();
-    return true;
-  },
-});
-var printerState = {};
-var printerState_proxy = new Proxy(printerState, {
-  set: function(obj, prop, value) {
-    obj[prop] = value;
-    updateUI();
-    return true;
-  },
-});
-
+var fileList = [];
 var selectedfile = {};
 var selectedfolder = "";
-var files = [];
-var folders = [];
+
 
 
 $( document ).ready(function() {
@@ -140,7 +106,6 @@ async function printerConnection() {
 	} else {
 		obj.command = "disconnect";
 	}
-	console.log(obj);
 	xhr.onload = function () {
 		if(obj.command == "disconnect" && xhr.status == 204) {
 			connectionState_proxy.state = "Closed";
@@ -182,14 +147,8 @@ async function getFiles() {
 	xhr.onload = function () {
 		folders = [];
 		files = [];
-	    var data = JSON.parse(xhr.responseText)
-		jQuery.each(data.files, function(index, value) {
-            if(value.type == "folder") {
-            	folders.push(value);
-            } else {
-            	files.push(value);
-            }
-        });
+	    var data = JSON.parse(xhr.responseText);
+	    fileList.push(data);
 		listFiles();
 	};
 	xhr.send();
@@ -197,25 +156,85 @@ async function getFiles() {
 
 async function listFiles() {
 	$('#filestable > tbody').empty();
-	if(folders.length > 0) {
-		jQuery.each(folders, function(index, value) {
-            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this,{ display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\' } })"><td><span class="icon">&#128193;</span></td><td>'+value.display+'</td><td></td></tr>');
-        });
-	}
-	if(files.length > 0) {
-		jQuery.each(files, function(index, value) {
-			var img;
-			if(value.refs.download != null) {
-				if(value.refs.download.includes(".gcode")) {
-					img = value.refs.download.replace(".gcode", ".png"); 
-					imgid = value.display.replace(".", "");
-				}
-				var tstamp = new Date(value.date*1000);
-				var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
-	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
+	var files = [];
+	var folders = [];
+	var path = selectedfolder.split("/");
+
+	var selpath;
+	if(selectedfolder.length > 0 && path[0] != "") { // Subfolder
+		for(var i = 0; i<fileList[0].files.length;i++) {
+			if(fileList[0].files[i].path == path[0]) {
+				pathobj = fileList[0].files[i];
 			}
-        });
+		}
+
+		if(path.length > 1) {
+			for(n=1;n<path.length;n++) {
+				for(m=0;m<pathobj.children.length;m++) {
+					if(pathobj.children[m].path == selectedfolder) {
+						pathobj = pathobj.children[m];
+					}
+				}
+			}
+		}
+
+		if(pathobj.children.length > 0) {
+			jQuery.each(pathobj.children, function(index, value) {
+			    if(value.type == "folder") {
+			    	folders.push(value);
+			    } else {
+			    	files.push(value);
+			    }
+			});
+		
+			$('#filestable > tbody:last-child').append('<tr onclick=""><td colspan="3" onclick="folderup()">&#x2190; back</td></tr>');
+
+			jQuery.each(folders, function(index, value) {
+	            $('#filestable > tbody:last-child').append('<tr onclick="selectFolder(\''+value.path+'\')"><td><span class="icon">&#128193;</span></td><td>'+value.display+'</td><td></td></tr>');
+	        });
+			jQuery.each(files, function(index, value) {
+				var img;
+				if(value.refs.download != null) {
+					if(value.refs.download.includes(".gcode")) {
+						img = value.refs.download.replace(".gcode", ".png"); 
+						imgid = value.display.replace(".", "");
+					}
+					var tstamp = new Date(value.date*1000);
+					var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
+		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
+				}
+	        });
+		}
+
+	} else { // Main folder
+		jQuery.each(fileList[0].files, function(index, value) {
+		    if(value.type == "folder") {
+		    	folders.push(value);
+		    } else {
+		    	files.push(value);
+		    }
+		});
+		if(folders.length > 0) {
+			jQuery.each(folders, function(index, value) {
+	            $('#filestable > tbody:last-child').append('<tr onclick="selectFolder(\''+value.path+'\')"><td><span class="icon">&#128193;</span></td><td>'+value.display+'</td><td></td></tr>');
+	        });
+		}
+		if(files.length > 0) {
+			jQuery.each(files, function(index, value) {
+				var img;
+				if(value.refs.download != null) {
+					if(value.refs.download.includes(".gcode")) {
+						img = value.refs.download.replace(".gcode", ".png"); 
+						imgid = value.display.replace(".", "");
+					}
+					var tstamp = new Date(value.date*1000);
+					var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
+		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
+				}
+	        });
+		}
 	}
+	
 }
 function zoomIn(id, event) {
 	var element = document.getElementById("overlay_"+id);
@@ -229,6 +248,15 @@ function zoomIn(id, event) {
 function zoomOut(id) {
 	var element = document.getElementById("overlay_"+id);
     element.style.display = "none";
+}
+
+function selectFolder(foldername) {
+	selectedfolder = foldername;
+	listFiles();
+}
+function folderup() {
+	selectedfolder = selectedfolder.substring(0, selectedfolder.lastIndexOf('/'))
+	listFiles();
 }
 
 function selectFile(selector, file) {
@@ -246,7 +274,6 @@ function selectFile(selector, file) {
 		$('#btn_cancel').attr("disabled", true);
 	}
 }
-
 
 async function loadprintFile(print) {
 	var url = octo_ip+"/api/files/local/"+selectedfile.display;
