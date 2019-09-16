@@ -249,7 +249,9 @@ function zoomOut(id) {
 	var element = document.getElementById("overlay_"+id);
     element.style.display = "none";
 }
-
+function getSelectedFolder() {
+	return selectedfolder;
+}
 function selectFolder(foldername) {
 	selectedfolder = foldername;
 	listFiles();
@@ -307,7 +309,13 @@ async function cancelJob() {
 }
 
 async function deleteFile() {
-	var url = octo_ip+"/api/files/local/"+selectedfile.display;
+	var url = "";
+	if(selectedfolder == "") {
+		url = octo_ip+"/api/files/local/"+selectedfile.display;
+	} else {
+		url = octo_ip+"/api/files/local/"+selectedfolder+"/"+selectedfile.display;
+	}
+	
 	var xhr = new XMLHttpRequest();
 	xhr.open("DELETE", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
