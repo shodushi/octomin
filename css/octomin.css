@@ -14,3 +14,27 @@
 }
 #dropzoneProgress .imgContainer { vertical-align: middle; }
 #dropzoneProgress .textContainer { display: inline-block; }
+
+
+.thumb {
+  background-image: url('/plugin/gbrowser/static/img/placeholder.png');
+  background-repeat: no-repeat;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+.overlay_wrapper {
+  position: relative;
+}
+.zoomoverlay {
+  border: 1px solid #d8d8d8;
+  width: 340px;
+  height: 272px;
+  display: none;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: -128px;
+  left: 242px;
+  background-color: white;
+}

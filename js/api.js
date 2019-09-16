@@ -33,12 +33,19 @@ var printerState_proxy = new Proxy(printerState, {
 });
 
 var selectedfile = {};
-//var printerState;
+var selectedfolder = "";
 var files = [];
 var folders = [];
 
 
 $( document ).ready(function() {
+	if(powerhandling != "yes") {
+		$('#control_power').css("display", "none");
+	}
+	if(lighthandling != "yes") {
+		$('#control_light').css("display", "none");
+	}
+
 	getConnectionState();
 	getLightState();
 	getPowerState();
@@ -201,13 +208,27 @@ async function listFiles() {
 			if(value.refs.download != null) {
 				if(value.refs.download.includes(".gcode")) {
 					img = value.refs.download.replace(".gcode", ".png"); 
+					imgid = value.display.replace(".", "");
 				}
 				var tstamp = new Date(value.date*1000);
 				var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
-	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" onerror="this.src=\'img/placeholder.png\'"></figure></td><td>'+value.display+'</td><td>'+date+'</td></tr>');
+	            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'</td></tr>');
 			}
         });
 	}
+}
+function zoomIn(id, event) {
+	var element = document.getElementById("overlay_"+id);
+	element.style.display = "inline-block";
+	var img = document.getElementById("imgZoom");
+	var posX = event.offsetX ? (event.offsetX) : event.pageX - img.offsetLeft;
+	var posY = event.offsetY ? (event.offsetY) : event.pageY - img.offsetTop;
+	element.style.backgroundPosition=(-posX*3.5)+"px "+(-posY*4)+"px";
+}
+
+function zoomOut(id) {
+	var element = document.getElementById("overlay_"+id);
+    element.style.display = "none";
 }
 
 function selectFile(selector, file) {

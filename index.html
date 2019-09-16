@@ -27,7 +27,7 @@
 		<div id="navbarBasicExample" class="navbar-menu">
 			<div class="navbar-start" style="width: 400px;">
 				<div id="meta" class="field is-grouped is-grouped-multiline" style="margin: 14px 0px 0px 20%;">
-					<div class="control">
+					<div class="control" id="control_power">
 						<div class="tags has-addons">
 							<span class="tag">Strom</span>
 							<a class="tag is-danger" id="tag_printer_power" onclick="powerswitch()">aus</a>
@@ -41,7 +41,7 @@
 						</div>
 					</div>
 
-					<div class="control">
+					<div class="control" id="control_light">
 						<div class="tags has-addons">
 							<span class="tag">Licht</span>
 							<a class="tag is-danger" id="tag_lightswitch" onclick="lightswitch()">aus</a>
@@ -145,7 +145,7 @@
 	</footer>
 
 	<script>
-	  var octoDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+	  var octoDropzone = new Dropzone(document.body, {
 	    init: function() {
 	    	this.on("sending", function() {
 				//alert("sending");
@@ -157,7 +157,7 @@
 				getFiles();
 			});
 		},
-	    url: octo_ip+"/api/files/local"
+	    url: octo_ip+"/api/files/local"+selectedfolder
 	  });
 	</script>
 
