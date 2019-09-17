@@ -68,3 +68,13 @@ tr.is-selected {
 .temp_ist #temp_bed_actual {
   background-color: #1c92eb;
 }
+#sliderextruderoutput {
+  background-color: white;
+  color: #ff3055;
+  font-weight: bold;
+}
+#sliderbedoutput {
+  background-color: white;
+  color: #1c92eb;
+  font-weight: bold;
+}
