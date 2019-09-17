@@ -63,7 +63,6 @@ function updateUI() {
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
 
-	printerState.state="Online";
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
 		$("#cardtools").css("display", "none");
