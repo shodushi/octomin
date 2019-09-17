@@ -380,3 +380,17 @@ async function setBedTemp(temp) {
 	};
 	xhr.send(JSON.stringify(obj));
 }
+
+function infomodal(action) {
+	if(action == "close") {
+		$("#infomodal").removeClass("is-active");
+	} else {
+		$("#infomodal").addClass("is-active");
+	}
+}
+
+
+
+
+
+
