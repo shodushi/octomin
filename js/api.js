@@ -63,6 +63,7 @@ function updateUI() {
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
 
+	printerState.state="Online";
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
 		$("#cardtools").css("display", "none");
@@ -389,6 +390,65 @@ function infomodal(action) {
 	}
 }
 
+function pcmds(sender) {
+	id = $(sender).data('id');
+	switch ($(sender).data('id')) {
+		case "chucknorris":
+			printercommand("M112");
+			break;
+		case "stop":
+			printercommand("M2");
+			// Anweisungen werden ausgeführt,
+			// falls expression mit value1 übereinstimmt
+			break;
+		case "fanon":
+			printercommand("M106");
+			break;
+		case "fanoff":
+			printercommand("M107");
+			break;
+		case "homeaxes":
+			printercommand("G28");
+			break;
+		case "motorsoff":
+			printercommand("M18");
+			// Anweisungen werden ausgeführt,
+			// falls expression mit value1 übereinstimmt
+			break;
+		case "unloadfilament":
+			printercommand("M702");
+			// Anweisungen werden ausgeführt,
+			// falls expression mit value1 übereinstimmt
+			break;
+		case "loadfilament":
+			printercommand("M702");
+			// Anweisungen werden ausgeführt,
+			// falls expression mit value1 übereinstimmt
+			break;
+		case "changefilament":
+			printercommand("M600");
+			// Anweisungen werden ausgeführt,
+			// falls expression mit value1 übereinstimmt
+			break;
+		default:
+			console.error("printer command not implemented");
+			break;
+	}
+}
+async function printercommand(cmd) {
+	var url = octo_ip+"/api/printer/command";
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	var obj = {};
+	obj.command = cmd;
+	obj.target = parseInt(temp);
+	xhr.onload = function () {
+		
+	};
+	xhr.send(JSON.stringify(obj));
+}
 
 
 
