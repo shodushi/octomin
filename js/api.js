@@ -405,8 +405,11 @@ function pcmds(sender) {
 		case "fanoff":
 			printercommand("M107");
 			break;
+		case "meshbedlevel":
+			printercommand("G80");
+			break;
 		case "homeaxes":
-			printercommand("G28");
+			printercommand("G28 W");
 			break;
 		case "motorsoff":
 			printercommand("M18");
@@ -441,7 +444,6 @@ async function printercommand(cmd) {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
 	obj.command = cmd;
-	obj.target = parseInt(temp);
 	xhr.onload = function () {
 		
 	};
