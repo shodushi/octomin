@@ -19,4 +19,4 @@ var apikey = "86DA1D669334418CB773A50A142A4E72";
 var cors_proxy = "http://192.168.120.244:8090"
 
 // enable/disable preview image of gcode files
-var previewimages = "no";
+//var previewimages = "no";

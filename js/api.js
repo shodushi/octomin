@@ -44,7 +44,7 @@ async function getSettings() {
 
 function updateUI() {
 	if(previewimages != "yes") {
-		$(".thumb_wrapper").css("display", "none");
+		$(".image").css("display", "none");
 	}
 
 	if(powerState.state == 0) {
