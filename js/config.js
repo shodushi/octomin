@@ -16,4 +16,7 @@ var apikey = "86DA1D669334418CB773A50A142A4E72";
 
 // only used if using external devices like tasmota or esphome devices
 // see https://www.npmjs.com/package/cors-anywhere for more info
-var cors_proxy = "http://192.168.120.244:8090";
+var cors_proxy = "http://192.168.120.244:8090"
+
+// enable/disable preview image of gcode files
+var previewimages = "no";

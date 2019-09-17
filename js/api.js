@@ -43,6 +43,10 @@ async function getSettings() {
 }
 
 function updateUI() {
+	if(previewimages != "yes") {
+		$(".thumb_wrapper").css("display", "none");
+	}
+
 	if(powerState.state == 0) {
 		$("#tag_printer_power").html('aus');
     	$("#tag_printer_power").attr('class', 'tag is-danger');
@@ -219,6 +223,7 @@ async function listFiles() {
 						img = value.refs.download.replace(".gcode", ".png"); 
 						imgid = value.display.replace(".", "");
 					}
+					var tstamp = new Date(value.date*1000);
 					var day = "0"+tstamp.getDate();
 					var month = "0"+tstamp.getMonth();
 					var date = day.slice(-2)+"."+month.slice(-2)+"."+tstamp.getFullYear();
