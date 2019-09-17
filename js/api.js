@@ -11,16 +11,36 @@ $( document ).ready(function() {
 	if(lighthandling != "yes") {
 		$('#control_light').css("display", "none");
 	}
-
+	getSettings();
 	getConnectionState();
 	getLightState();
 	getPowerState();
 	getPrinterState();
 	getFiles();
-})
 
+	printerstateTimer();
+});
 
+function printerstateTimer() {
+	setTimeout(function(){
+		if(printerState.state != "Closed" && printerState.state != null) {
+			getPrinterState();
+			printerstateTimer();
+		}
+	}, 5000);
+}
 
+async function getSettings() {
+	var url = octo_ip+"/api/settings";
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	xhr.onload = function () {
+	    var data = JSON.parse(xhr.responseText);
+	    $("#printerCam").attr("src", data.webcam.streamUrl);
+	};
+	xhr.send();
+}
 
 function updateUI() {
 	if(powerState.state == 0) {
@@ -43,7 +63,6 @@ function updateUI() {
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
 
-
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
 		$("#cardtools").css("display", "none");
@@ -56,8 +75,17 @@ function updateUI() {
 			$("#bedtempactual").html(printerState.temperature.bed.actual);
 			$("#tool0temptarget").html(printerState.temperature.tool0.target);
 			$("#bedtemptarget").html(printerState.temperature.bed.target);
+			var temptool0_ist = (100/printerState.temperature.tool0.target)*printerState.temperature.tool0.actual;
+			$("#temp_tool0_actual").css("height", temptool0_ist+"%");
+			var tempbed_ist = (100/printerState.temperature.bed.target)*printerState.temperature.bed.actual;
+			$("#temp_bed_actual").css("height", tempbed_ist+"%");
+			$("#sliderExtruder").val(parseInt(printerState.temperature.tool0.target));
+			$("#sliderextruderoutput").html(printerState.temperature.tool0.target);
+			$("#sliderBed").val(parseInt(printerState.temperature.bed.target));
+			$("#sliderbedoutput").html(printerState.temperature.bed.target);
 		}
 	}
+	
 
 	if(lightState.state == "OFF") {
 		$("#tag_lightswitch").html('aus');
@@ -140,13 +168,12 @@ async function tryConnectionState(tries, command) {
 	}
 }
 async function getFiles() {
+	fileList = [];
 	var url = octo_ip+"/api/files?recursive=true";
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	xhr.onload = function () {
-		folders = [];
-		files = [];
 	    var data = JSON.parse(xhr.responseText);
 	    fileList.push(data);
 		listFiles();
@@ -159,15 +186,12 @@ async function listFiles() {
 	var files = [];
 	var folders = [];
 	var path = selectedfolder.split("/");
-
-	var selpath;
 	if(selectedfolder.length > 0 && path[0] != "") { // Subfolder
 		for(var i = 0; i<fileList[0].files.length;i++) {
 			if(fileList[0].files[i].path == path[0]) {
 				pathobj = fileList[0].files[i];
 			}
 		}
-
 		if(path.length > 1) {
 			for(n=1;n<path.length;n++) {
 				for(m=0;m<pathobj.children.length;m++) {
@@ -177,7 +201,6 @@ async function listFiles() {
 				}
 			}
 		}
-
 		if(pathobj.children.length > 0) {
 			jQuery.each(pathobj.children, function(index, value) {
 			    if(value.type == "folder") {
@@ -186,9 +209,7 @@ async function listFiles() {
 			    	files.push(value);
 			    }
 			});
-		
 			$('#filestable > tbody:last-child').append('<tr onclick=""><td colspan="3" onclick="folderup()">&#x2190; back</td></tr>');
-
 			jQuery.each(folders, function(index, value) {
 	            $('#filestable > tbody:last-child').append('<tr onclick="selectFolder(\''+value.path+'\')"><td><span class="icon">&#128193;</span></td><td>'+value.display+'</td><td></td></tr>');
 	        });
@@ -205,7 +226,6 @@ async function listFiles() {
 				}
 	        });
 		}
-
 	} else { // Main folder
 		jQuery.each(fileList[0].files, function(index, value) {
 		    if(value.type == "folder") {
@@ -336,12 +356,13 @@ async function setExtruderTemp(temp) {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
 	obj.command = "target";
-	obj.targets = {"tool0": temp};
+	obj.targets = {"tool0": parseInt(temp)};
 	xhr.onload = function () {
 		getPrinterState();
 	};
 	xhr.send(JSON.stringify(obj));
 }
+
 async function setBedTemp(temp) {
 	var url = octo_ip+"/api/printer/bed";
 	var xhr = new XMLHttpRequest();
@@ -350,26 +371,9 @@ async function setBedTemp(temp) {
 	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
 	obj.command = "target";
-	obj.target = temp;
+	obj.target = parseInt(temp);
 	xhr.onload = function () {
 		getPrinterState();
 	};
 	xhr.send(JSON.stringify(obj));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
