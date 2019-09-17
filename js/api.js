@@ -220,8 +220,9 @@ async function listFiles() {
 						img = value.refs.download.replace(".gcode", ".png"); 
 						imgid = value.display.replace(".", "");
 					}
-					var tstamp = new Date(value.date*1000);
-					var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
+					var day = "0"+tstamp.getDate();
+					var month = "0"+tstamp.getMonth();
+					var date = day.slice(-2)+"."+month.slice(-2)+"."+tstamp.getFullYear();
 		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
 				}
 	        });
@@ -248,7 +249,9 @@ async function listFiles() {
 						imgid = value.display.replace(".", "");
 					}
 					var tstamp = new Date(value.date*1000);
-					var date = tstamp.getDate()+"."+tstamp.getMonth()+"."+tstamp.getFullYear();
+					var day = "0"+tstamp.getDate();
+					var month = "0"+tstamp.getMonth();
+					var date = day.slice(-2)+"."+month.slice(-2)+"."+tstamp.getFullYear();
 		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
 				}
 	        });
