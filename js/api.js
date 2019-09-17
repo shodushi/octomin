@@ -43,9 +43,10 @@ async function getSettings() {
 }
 
 function updateUI() {
+	/*
 	if(previewimages != "yes") {
 		$(".image").css("display", "none");
-	}
+	}*/
 
 	if(powerState.state == 0) {
 		$("#tag_printer_power").html('aus');
