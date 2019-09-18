@@ -5,14 +5,17 @@ var selectedfolder = "";
 $( document ).ready(function() {
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
+	} else {
+		getPowerState();
 	}
 	if(lighthandling != "yes") {
 		$('#control_light').css("display", "none");
+	} else {
+		getLightState();
 	}
+	
 	getSettings();
 	getConnectionState();
-	getLightState();
-	getPowerState();
 	getPrinterState();
 	getFiles();
 
@@ -67,7 +70,7 @@ function updateUI() {
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
 
-	
+	printerState.state = "UP";
 
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
@@ -406,51 +409,12 @@ function infomodal(action) {
 
 function pcmds(sender) {
 	id = $(sender).data('id');
-	switch ($(sender).data('id')) {
-		case "emergencystop":
-			printercommand("M112");
-			break;
-		case "stop":
-			printercommand("M2");
-			// Anweisungen werden ausgeführt,
-			// falls expression mit value1 übereinstimmt
-			break;
-		case "fanon":
-			printercommand("M106");
-			break;
-		case "fanoff":
-			printercommand("M107");
-			break;
-		case "meshbedlevel":
-			printercommand("G80");
-			break;
-		case "homeaxes":
-			printercommand("G28 W");
-			break;
-		case "motorsoff":
-			printercommand("M18");
-			// Anweisungen werden ausgeführt,
-			// falls expression mit value1 übereinstimmt
-			break;
-		case "unloadfilament":
-			printercommand("M702");
-			// Anweisungen werden ausgeführt,
-			// falls expression mit value1 übereinstimmt
-			break;
-		case "loadfilament":
-			printercommand("M702");
-			// Anweisungen werden ausgeführt,
-			// falls expression mit value1 übereinstimmt
-			break;
-		case "changefilament":
-			printercommand("M600");
-			// Anweisungen werden ausgeführt,
-			// falls expression mit value1 übereinstimmt
-			break;
-		default:
-			console.error("printer command not implemented");
-			break;
-	}
+	jQuery.each(gcodes[printer_firmware], function(index, value) {
+		if(value.cmd == $(sender).data('id') && value.gcmd != null && value.gcmd != "") {
+			printercommand(value.gcmd);
+		}
+	});
+		
 }
 async function printercommand(cmd) {
 	var url = octo_ip+"/api/printer/command";
