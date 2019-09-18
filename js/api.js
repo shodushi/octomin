@@ -2,8 +2,6 @@ var fileList = [];
 var selectedfile = {};
 var selectedfolder = "";
 
-
-
 $( document ).ready(function() {
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
@@ -19,6 +17,7 @@ $( document ).ready(function() {
 	getFiles();
 
 	printerstateTimer();
+	dropdownPrinterCmd();
 });
 
 function printerstateTimer() {
@@ -67,6 +66,9 @@ function updateUI() {
 	}
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
+
+	
+
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
 		$("#cardtools").css("display", "none");
@@ -264,6 +266,14 @@ async function listFiles() {
 	}
 	
 }
+
+function dropdownPrinterCmd() {
+	jQuery.each(gcodes[printer_firmware], function(index, value) {
+		$('#dropdown-item_printer_commands:last-child').append('<a class="dropdown-item" data-id="'+value.cmd+'" onclick="pcmds(this)"><i class="fas '+value.icon+'"></i> '+value.label+'</a>');
+	});
+}
+
+
 function zoomIn(id, event) {
 	var element = document.getElementById("overlay_"+id);
 	element.style.display = "inline-block";
@@ -397,7 +407,7 @@ function infomodal(action) {
 function pcmds(sender) {
 	id = $(sender).data('id');
 	switch ($(sender).data('id')) {
-		case "chucknorris":
+		case "emergencystop":
 			printercommand("M112");
 			break;
 		case "stop":
