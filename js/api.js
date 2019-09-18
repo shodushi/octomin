@@ -2,7 +2,32 @@ var fileList = [];
 var selectedfile = {};
 var selectedfolder = "";
 
+
+$.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textStatus, jqxhr) {
+	console.log(data); //data returned
+	console.log(textStatus); //success
+	console.log(jqxhr.status); //200
+	console.log('Load was performed.');
+});
+
 $( document ).ready(function() {
+
+	OctoPrint.options.baseurl = octo_ip;
+	OctoPrint.options.apikey = apikey;
+
+	OctoPrint.socket.connect();
+
+	OctoPrint.socket.onMessage("*", function(message) {
+	    if(message.event == "event") {
+	    	if(message.data.type == "PrinterStateChanged") {
+		    	console.log("PrinterStateChanged");
+		    	console.log(message.data.payload.state_string);
+		    }
+	    }
+	    
+	});
+
+
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
 	} else {
@@ -13,7 +38,7 @@ $( document ).ready(function() {
 	} else {
 		getLightState();
 	}
-	
+
 	getSettings();
 	getConnectionState();
 	getPrinterState();
@@ -33,15 +58,10 @@ function printerstateTimer() {
 }
 
 async function getSettings() {
-	var url = octo_ip+"/api/settings";
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url, true);
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	xhr.onload = function () {
-	    var data = JSON.parse(xhr.responseText);
-	    $("#printerCam").attr("src", data.webcam.streamUrl);
-	};
-	xhr.send();
+	OctoPrint.settings.get().then(data => {
+		console.log(data);
+		$("#printerCam").attr("src", data.webcam.streamUrl);
+	});
 }
 
 function updateUI() {
@@ -69,8 +89,6 @@ function updateUI() {
 	}
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
-
-	printerState.state = "UP";
 
 	if(printerState.state == "Closed" || printerState.state == null) {
 		$("#cardprinterstatus").css("display", "none");
@@ -127,37 +145,28 @@ async function lightswitch() {
 }
 
 async function printerConnection() {
-	var url = octo_ip+"/api/connection";
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("X-Api-Key", apikey);
 	var obj = {};
 	if(connectionState.state == "Closed") {
-		obj.command = "connect";
 		obj.port = "/dev/ttyACM0";
 		obj.baudrate = 115200;
 		obj.printerProfile = "_default";
 		obj.save = true;
 		obj.autoconnect = false;
+		OctoPrint.connection.connect(obj).then(data => {
+			tryConnectionState(0, "connect");
+		});
 	} else {
-		obj.command = "disconnect";
-	}
-	xhr.onload = function () {
-		if(obj.command == "disconnect" && xhr.status == 204) {
+		OctoPrint.connection.disconnect().then(data => {
 			connectionState_proxy.state = "Closed";
 			printerState_proxy.state = "Closed";
-		} else {
-			tryConnectionState(0, obj.command);
-		}
-	};
-	xhr.send(JSON.stringify(obj));
+		});
+	}
 }
 
 async function tryConnectionState(tries, command) {
 	if(command == "connect") {
 		if(printerState.state == null || printerState.state == "Closed") {
-			if(tries < 5) {
+			if(tries < 7) {
 				setTimeout(function(){
 					getConnectionState();
 					tries++;
@@ -178,16 +187,12 @@ async function tryConnectionState(tries, command) {
 }
 async function getFiles() {
 	fileList = [];
-	var url = octo_ip+"/api/files?recursive=true";
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url, true);
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	xhr.onload = function () {
-	    var data = JSON.parse(xhr.responseText);
-	    fileList.push(data);
+	OctoPrint.files.list().done(data => {
+		fileList.push(data);
 		listFiles();
-	};
-	xhr.send();
+	});
+
+
 }
 
 async function listFiles() {
@@ -370,33 +375,16 @@ async function deleteFile() {
 }
 
 async function setExtruderTemp(temp) {
-	var url = octo_ip+"/api/printer/tool";
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	var obj = {};
-	obj.command = "target";
-	obj.targets = {"tool0": parseInt(temp)};
-	xhr.onload = function () {
+
+	OctoPrint.printer.setToolTargetTemperatures({"tool0": parseInt(temp)}).done(data => {
 		getPrinterState();
-	};
-	xhr.send(JSON.stringify(obj));
+	});
 }
 
 async function setBedTemp(temp) {
-	var url = octo_ip+"/api/printer/bed";
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	var obj = {};
-	obj.command = "target";
-	obj.target = parseInt(temp);
-	xhr.onload = function () {
+	OctoPrint.printer.setBedTargetTemperature(parseInt(temp)).done(data => {
 		getPrinterState();
-	};
-	xhr.send(JSON.stringify(obj));
+	});
 }
 
 function infomodal(action) {
@@ -411,25 +399,12 @@ function pcmds(sender) {
 	id = $(sender).data('id');
 	jQuery.each(gcodes[printer_firmware], function(index, value) {
 		if(value.cmd == $(sender).data('id') && value.gcmd != null && value.gcmd != "") {
-			printercommand(value.gcmd);
+			OctoPrint.control.sendGcode(value.gcmd).done(data => {
+				
+			});
 		}
-	});
-		
+	});		
 }
-async function printercommand(cmd) {
-	var url = octo_ip+"/api/printer/command";
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	var obj = {};
-	obj.command = cmd;
-	xhr.onload = function () {
-		
-	};
-	xhr.send(JSON.stringify(obj));
-}
-
 
 
 

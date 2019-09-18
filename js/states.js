@@ -20,31 +20,15 @@ async function getPowerState() {
 }
 
 async function getConnectionState() {
-	var url = octo_ip+"/api/connection";
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url, true);
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	xhr.onload = function () {
-	    var data = JSON.parse(xhr.responseText)
+	OctoPrint.connection.getSettings().done(data => {
 		connectionState_proxy.state = data.current.state;
 		connectionState_proxy.printerName = data.options.printerProfiles[0].name;
-	};
-	xhr.send();
+	});
 }
 
 async function getPrinterState() {
-	var url = octo_ip+"/api/printer?history=true&limit=2";
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", url, true);
-	xhr.setRequestHeader("X-Api-Key", apikey);
-	xhr.onload = function () {
-		try {
-			data = JSON.parse(xhr.responseText);
-		    printerState_proxy.state = data.state.text;
-		    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
-		} catch (e) {
-			console.log("Oh well, but whatever...");
-		}
-	};
-	xhr.send();
+	OctoPrint.printer.getFullState().done(data => {
+		printerState_proxy.state = data.state.text;
+	    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
+	});
 }
