@@ -1,14 +1,9 @@
 var fileList = [];
 var selectedfile = {};
 var selectedfolder = "";
-
+var cam = "";
 
 $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textStatus, jqxhr) {
-
-});
-
-$( document ).ready(function() {
-
 	OctoPrint.options.baseurl = octo_ip;
 	OctoPrint.options.apikey = apikey;
 	OctoPrint.socket.connect();
@@ -29,6 +24,9 @@ $( document ).ready(function() {
 	    	textarea.scrollTop = textarea.scrollHeight;
 	    }
 	});
+});
+
+$( document ).ready(function() {
 
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
@@ -60,7 +58,7 @@ function printerstateTimer() {
 
 async function getSettings() {
 	OctoPrint.settings.get().then(data => {
-		$("#printerCam").attr("src", data.webcam.streamUrl);
+		cam = data.webcam.streamUrl;
 	});
 }
 
@@ -69,7 +67,7 @@ function updateUI() {
 	if(previewimages != "yes") {
 		$(".image").css("display", "none");
 	}*/
-
+	$("#printerCam").attr("src", cam);
 	if(powerState.state == 0) {
 		$("#tag_printer_power").html('aus');
     	$("#tag_printer_power").attr('class', 'tag is-danger');
