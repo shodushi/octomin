@@ -24,10 +24,11 @@ $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textSta
 	    	textarea.scrollTop = textarea.scrollHeight;
 	    }
 	});
+
+	getSettings();
 });
 
 $( document ).ready(function() {
-
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
 	} else {
@@ -59,6 +60,7 @@ function printerstateTimer() {
 async function getSettings() {
 	OctoPrint.settings.get().then(data => {
 		cam = data.webcam.streamUrl;
+		$("#printerCam").attr("src", cam);
 	});
 }
 
