@@ -18,7 +18,6 @@ async function getPowerState() {
 	};
 	xhr.send();
 }
-
 async function getConnectionState() {
 	OctoPrint.connection.getSettings().done(data => {
 		connectionState_proxy.state = data.current.state;
@@ -28,7 +27,6 @@ async function getConnectionState() {
 		}
 	});
 }
-
 async function getPrinterState() {
 	if(connectionState.state != "Closed" && connectionState.state != "Offline") {
 		OctoPrint.printer.getFullState().done(data => {

@@ -6,24 +6,24 @@
 		
 		<script src="js/config.js" type="text/javascript"></script>
 		<script src="js/proxies.js" type="text/javascript"></script>
-		
-
 		<script src="js/jquery-3.4.1.min.js" type="text/javascript"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script src="js/lodash.min.js" type="text/javascript"></script>
 		<script src="js/sockjs.min.js"></script>
-
 		<script src="js/api.js" type="text/javascript"></script>
 		<script src="js/states.js" type="text/javascript"></script>
 		<script src="js/dropzone.min.js"></script>
 		<script src="js/fa-all.js"></script>
 		<script src="js/bulma_slider.js" type="text/javascript"></script>
-
 	</head>
 	<body>
 	<div id="dropzoneProgress">
 		<div class="imgContainer"><img src="img/upload.gif"></div>
 		<div class="textContainer"><h3>uploading...</h3></div>
 	</div>
+	<article id="messagebox" class="message is-danger">
+	  <div id="messagebox_body" class="message-body"></div>
+	</article>
 	<nav class="navbar" role="navigation" aria-label="main navigation">
 		<div class="navbar-brand">
 			<a class="navbar-item" href="https://bulma.io">
@@ -59,6 +59,7 @@
 			<div class="navbar-end">
 				<div class="navbar-item">
 					<div class="buttons">
+						<a class="button is-info is-small" onclick="terminal('show')">Terminal</a>
 						<a class="button is-info is-small" onclick="infomodal('show')">Info</a>
 					</div>
 				</div>
@@ -88,6 +89,17 @@
 			<footer class="modal-card-foot">
 				<button class="button" onclick="infomodal('close')">Got it</button>
 			</footer>
+		</div>
+	</div>
+	<div id="terminal">
+		<div id="terminal_header">
+			<div style="width: 96%; float: left;">Terminal</div>
+			<button class="delete" aria-label="close" onclick="terminal('close')" style=""></button>
+		</div>
+		<div class="field">
+			<div class="control">
+				<textarea id="terminal_console" class="textarea is-warning" placeholder=""></textarea>
+			</div>
 		</div>
 	</div>
 
@@ -195,9 +207,18 @@
 	  var octoDropzone = new Dropzone(document.body, {
 	    init: function() {
 	    	this.on("sending", function(file, xhr, formData) {
-				formData.append("path", getSelectedFolder());
-				$("#dropzoneProgress").css("display", "block");
-				$(".dz-preview").css("display", "none");
+	    		$(".dz-preview").css("display", "none");
+	    		if(file.name.split('.').pop() != "gcode" || file.name.split('.').pop() != "stl") {
+	    			$("#messagebox_body").html("only gcode or stl files possible to upload");
+	    			$("#messagebox").show( "slow" );
+	    			setTimeout(function(){
+						$("#messagebox").hide( "slow" );
+					}, 5000);
+	    		} else {
+	    			formData.append("path", getSelectedFolder());
+					$("#dropzoneProgress").css("display", "block");
+	    		}
+				
 			});
 			this.on("success", function() {
 				$("#dropzoneProgress").css("display", "none");

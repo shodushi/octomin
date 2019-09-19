@@ -78,3 +78,31 @@ tr.is-selected {
   color: #1c92eb;
   font-weight: bold;
 }
+#messagebox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 999;
+  width: 40%;
+  height: auto;
+  display: none;
+}
+#messagebox div {
+  font-size: 80%;
+}
+#terminal {
+  position: absolute;
+  top: 100px;
+  left: 20%;
+  width: 50%;
+  max-width: 600px;
+  height: 200px;
+  z-index: 999;
+  display: none;
+}
+#terminal_header {
+  background-color: #ffdd57;
+  color: black;
+  cursor: grab;
+  padding: 4px;
+}

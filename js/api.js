@@ -14,16 +14,20 @@ $( document ).ready(function() {
 	OctoPrint.socket.connect();
 
 	OctoPrint.socket.onMessage("*", function(message) {
+		console.log(message);
 	    if(message.event == "event") {
 	    	if(message.data.type == "PrinterStateChanged") {
-		    	console.log("PrinterStateChanged");
-		    	console.log(message.data.payload.state_string);
 		    	connectionState_proxy.state = message.data.payload.state_string;
 		    	printerState_proxy.state = message.data.payload.state_string;
 		    	getConnectionState();
 		    } else if(message.data.type == "UpdatedFiles") {
 		    	getFiles();
 		    }
+	    }
+	    if(message.event == "current") {
+	    	$("#terminal_console").append(message.data.logs+"\n");
+	    	var textarea = document.getElementById('terminal_console');
+	    	textarea.scrollTop = textarea.scrollHeight;
 	    }
 	});
 
@@ -37,6 +41,7 @@ $( document ).ready(function() {
 	} else {
 		getLightState();
 	}
+	$( "#terminal" ).draggable();
 
 	getSettings();
 	getConnectionState();
@@ -86,13 +91,13 @@ function updateUI() {
 	if(connectionState.state == "Closed" || connectionState.state == "Offline" || connectionState.state == null || printerState.state == null) {
 		$("#tag_btn_connect").html('aus');
     	$("#tag_btn_connect").attr('class', 'tag is-danger');
-    	$("#cardprinterstatus").css("display", "none");
+    	$("#cardprinterstatus").hide( "slow" );
 		$("#cardtools").css("display", "none");
 	} else {
 		$("#tag_btn_connect").html('an');
     	$("#tag_btn_connect").attr('class', 'tag is-success');
-		$("#cardprinterstatus").css("display", "block");
-		$("#cardtools").css("display", "block");
+		$("#cardprinterstatus").show( "slow" );
+		$("#cardtools").show( "slow" );
 		if(printerState.temperature != null) {
 			$("#tool0tempactual").html(printerState.temperature.tool0.actual);
 			$("#bedtempactual").html(printerState.temperature.bed.actual);
@@ -108,7 +113,6 @@ function updateUI() {
 			$("#sliderbedoutput").html(printerState.temperature.bed.target);
 		}
 	}
-	
 
 	if(lightState.state == "OFF") {
 		$("#tag_lightswitch").html('aus');
@@ -187,8 +191,6 @@ async function getFiles() {
 		fileList.push(data);
 		listFiles();
 	});
-
-
 }
 
 async function listFiles() {
@@ -371,7 +373,6 @@ async function deleteFile() {
 }
 
 async function setExtruderTemp(temp) {
-
 	OctoPrint.printer.setToolTargetTemperatures({"tool0": parseInt(temp)}).done(data => {
 		getPrinterState();
 	});
@@ -388,6 +389,14 @@ function infomodal(action) {
 		$("#infomodal").removeClass("is-active");
 	} else {
 		$("#infomodal").addClass("is-active");
+	}
+}
+
+function terminal(action) {
+	if(action == "close") {
+		$("#terminal").hide("slow");
+	} else {
+		$("#terminal").show("slow");
 	}
 }
 
