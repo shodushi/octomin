@@ -215,6 +215,7 @@
 						$("#messagebox").hide( "slow" );
 					}, 5000);
 	    		} else {
+	    			alert(getSelectedFolder());
 	    			formData.append("path", getSelectedFolder());
 					$("#dropzoneProgress").css("display", "block");
 	    		}

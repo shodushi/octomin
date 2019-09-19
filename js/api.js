@@ -184,11 +184,26 @@ async function tryConnectionState(tries, command) {
 	}
 }
 async function getFiles() {
-	fileList = [];
+	/*
+	//deactivated because api also lists already deleted files
+	fileList = null;
 	OctoPrint.files.list().done(data => {
+		fileList = [];
 		fileList.push(data);
 		listFiles();
 	});
+	*/
+	fileList = [];
+	var url = octo_ip+"/api/files?recursive=true";
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+	xhr.setRequestHeader("X-Api-Key", apikey);
+	xhr.onload = function () {
+	    var data = JSON.parse(xhr.responseText);
+	    fileList.push(data);
+		listFiles();
+	};
+	xhr.send();
 }
 
 async function listFiles() {
@@ -357,7 +372,6 @@ async function deleteFile() {
 	} else {
 		url = octo_ip+"/api/files/local/"+selectedfolder+"/"+selectedfile.display;
 	}
-	
 	var xhr = new XMLHttpRequest();
 	xhr.open("DELETE", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
