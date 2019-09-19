@@ -208,7 +208,7 @@
 	    init: function() {
 	    	this.on("sending", function(file, xhr, formData) {
 	    		$(".dz-preview").css("display", "none");
-	    		if(file.name.split('.').pop() != "gcode" || file.name.split('.').pop() != "stl") {
+	    		if(file.name.split('.').pop() != "gcode" && file.name.split('.').pop() != "stl") {
 	    			$("#messagebox_body").html("only gcode or stl files possible to upload");
 	    			$("#messagebox").show( "slow" );
 	    			setTimeout(function(){
