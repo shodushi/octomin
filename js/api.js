@@ -4,17 +4,13 @@ var selectedfolder = "";
 
 
 $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textStatus, jqxhr) {
-	console.log(data); //data returned
-	console.log(textStatus); //success
-	console.log(jqxhr.status); //200
-	console.log('Load was performed.');
+
 });
 
 $( document ).ready(function() {
 
 	OctoPrint.options.baseurl = octo_ip;
 	OctoPrint.options.apikey = apikey;
-
 	OctoPrint.socket.connect();
 
 	OctoPrint.socket.onMessage("*", function(message) {
@@ -22,11 +18,14 @@ $( document ).ready(function() {
 	    	if(message.data.type == "PrinterStateChanged") {
 		    	console.log("PrinterStateChanged");
 		    	console.log(message.data.payload.state_string);
+		    	connectionState_proxy.state = message.data.payload.state_string;
+		    	printerState_proxy.state = message.data.payload.state_string;
+		    	getConnectionState();
+		    } else if(message.data.type == "UpdatedFiles") {
+		    	getFiles();
 		    }
 	    }
-	    
 	});
-
 
 	if(powerhandling != "yes") {
 		$('#control_power').css("display", "none");
@@ -41,9 +40,7 @@ $( document ).ready(function() {
 
 	getSettings();
 	getConnectionState();
-	getPrinterState();
 	getFiles();
-
 	printerstateTimer();
 	dropdownPrinterCmd();
 });
@@ -79,24 +76,23 @@ function updateUI() {
     	$("#tag_printer_power").attr('class', 'tag is-success');
     }
 
-	if(connectionState.state == "Closed" || connectionState.state == null) {
-		$("#tag_btn_connect").html('aus');
-    	$("#tag_btn_connect").attr('class', 'tag is-danger');
-	} else {
-		$("#tag_btn_connect").html('an');
-    	$("#tag_btn_connect").attr('class', 'tag is-success');
-	
-	}
 	$("#printername").html(connectionState.printerName);
 	$("#connectionstatus").html(connectionState.state);
 
-	if(printerState.state == "Closed" || printerState.state == null) {
-		$("#cardprinterstatus").css("display", "none");
+	if(printerState.state == "Printing") {
+		$('#btn_cancel').attr("disabled", false);
+	}
+
+	if(connectionState.state == "Closed" || connectionState.state == "Offline" || connectionState.state == null || printerState.state == null) {
+		$("#tag_btn_connect").html('aus');
+    	$("#tag_btn_connect").attr('class', 'tag is-danger');
+    	$("#cardprinterstatus").css("display", "none");
 		$("#cardtools").css("display", "none");
 	} else {
+		$("#tag_btn_connect").html('an');
+    	$("#tag_btn_connect").attr('class', 'tag is-success');
 		$("#cardprinterstatus").css("display", "block");
 		$("#cardtools").css("display", "block");
-		$("#printerstatus").html(printerState.state.text);
 		if(printerState.temperature != null) {
 			$("#tool0tempactual").html(printerState.temperature.tool0.actual);
 			$("#bedtempactual").html(printerState.temperature.bed.actual);

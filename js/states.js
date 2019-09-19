@@ -23,12 +23,19 @@ async function getConnectionState() {
 	OctoPrint.connection.getSettings().done(data => {
 		connectionState_proxy.state = data.current.state;
 		connectionState_proxy.printerName = data.options.printerProfiles[0].name;
+		if(data.current.state != "Closed") {
+			getPrinterState();
+		}
 	});
 }
 
 async function getPrinterState() {
-	OctoPrint.printer.getFullState().done(data => {
-		printerState_proxy.state = data.state.text;
-	    printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
-	});
+	if(connectionState.state != "Closed" && connectionState.state != "Offline") {
+		OctoPrint.printer.getFullState().done(data => {
+			printerState_proxy.state = data.state.text;
+			if(data.temperature.bed != null) {
+				printerState_proxy.temperature = {"bed": {"actual": data.temperature.bed.actual, "offset": data.temperature.bed.offset, "target": data.temperature.bed.target}, "tool0": {"actual": data.temperature.tool0.actual, "offset": data.temperature.tool0.offset, "target": data.temperature.tool0.target} };
+			}
+		});
+	}
 }
