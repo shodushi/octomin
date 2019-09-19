@@ -17,7 +17,6 @@ var lightState_proxy = new Proxy(lightState, {
 var connectionState = {};
 var connectionState_proxy = new Proxy(connectionState, {
   set: function(obj, prop, value) {
-    console.log("proxy: connection");
     obj[prop] = value;
     updateUI();
     return true;
@@ -27,7 +26,6 @@ var connectionState_proxy = new Proxy(connectionState, {
 var printerState = {};
 var printerState_proxy = new Proxy(printerState, {
   set: function(obj, prop, value) {
-    console.log("proxy: printer");
     obj[prop] = value;
     updateUI();
     return true;
