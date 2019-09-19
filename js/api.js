@@ -14,7 +14,6 @@ $( document ).ready(function() {
 	OctoPrint.socket.connect();
 
 	OctoPrint.socket.onMessage("*", function(message) {
-		console.log(message);
 	    if(message.event == "event") {
 	    	if(message.data.type == "PrinterStateChanged") {
 		    	connectionState_proxy.state = message.data.payload.state_string;
@@ -61,7 +60,6 @@ function printerstateTimer() {
 
 async function getSettings() {
 	OctoPrint.settings.get().then(data => {
-		console.log(data);
 		$("#printerCam").attr("src", data.webcam.streamUrl);
 	});
 }
