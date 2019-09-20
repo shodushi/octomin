@@ -73,11 +73,11 @@ function updateUI() {
 	$('#tab_'+file_origin).addClass("is-active");
 	$("#printerCam").attr("src", cam);
 	if(powerState.state == 0) {
-		$("#tag_printer_power").html('aus');
+		$("#tag_printer_power").html('off');
     	$("#tag_printer_power").attr('class', 'tag is-danger');
     }
     if(powerState.state == 1) {
-    	$("#tag_printer_power").html('an');
+    	$("#tag_printer_power").html('on');
     	$("#tag_printer_power").attr('class', 'tag is-success');
     }
 
@@ -89,12 +89,12 @@ function updateUI() {
 	}
 
 	if(connectionState.state == "Closed" || connectionState.state == "Offline" || connectionState.state == null || printerState.state == null) {
-		$("#tag_btn_connect").html('aus');
+		$("#tag_btn_connect").html('off');
     	$("#tag_btn_connect").attr('class', 'tag is-danger');
     	$("#cardprinterstatus").hide( "slow" );
 		$("#cardtools").css("display", "none");
 	} else {
-		$("#tag_btn_connect").html('an');
+		$("#tag_btn_connect").html('on');
     	$("#tag_btn_connect").attr('class', 'tag is-success');
 		$("#cardprinterstatus").show( "slow" );
 		$("#cardtools").show( "slow" );
@@ -115,11 +115,11 @@ function updateUI() {
 	}
 
 	if(lightState.state == "OFF") {
-		$("#tag_lightswitch").html('aus');
+		$("#tag_lightswitch").html('off');
 		$("#tag_lightswitch").attr('class', 'tag is-danger');
     }
     if(lightState.state == "ON") {
-    	$("#tag_lightswitch").html('an');
+    	$("#tag_lightswitch").html('on');
     	$("#tag_lightswitch").attr('class', 'tag is-success');
     }
 }
