@@ -2,6 +2,7 @@ var fileList = [];
 var selectedfile = {};
 var selectedfolder = "";
 var cam = "";
+var file_origin = "local";
 
 $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textStatus, jqxhr) {
 	OctoPrint.options.baseurl = octo_ip;
@@ -69,6 +70,7 @@ function updateUI() {
 	if(previewimages != "yes") {
 		$(".image").css("display", "none");
 	}*/
+	$('#tab_'+file_origin).addClass("is-active");
 	$("#printerCam").attr("src", cam);
 	if(powerState.state == 0) {
 		$("#tag_printer_power").html('aus');
@@ -255,11 +257,14 @@ async function listFiles() {
 		}
 	} else { // Main folder
 		jQuery.each(fileList[0].files, function(index, value) {
-		    if(value.type == "folder") {
-		    	folders.push(value);
-		    } else {
-		    	files.push(value);
-		    }
+			if(value.origin == file_origin) {
+				console.log(value);
+			    if(value.type == "folder") {
+			    	folders.push(value);
+			    } else {
+			    	files.push(value);
+			    }
+		}
 		});
 		if(folders.length > 0) {
 			jQuery.each(folders, function(index, value) {
@@ -269,16 +274,28 @@ async function listFiles() {
 		if(files.length > 0) {
 			jQuery.each(files, function(index, value) {
 				var img;
-				if(value.refs.download != null) {
-					if(value.refs.download.includes(".gcode")) {
-						img = value.refs.download.replace(".gcode", ".png"); 
-						imgid = value.display.replace(".", "");
+				var download;
+				if(value.refs.resource != null) {
+					if(file_origin == "local" && value.refs.resource.includes(".gcode")) {
+						img = value.refs.download.replace(".gcode", ".png");
+						download = value.refs.download;
 					}
-					var tstamp = new Date(value.date*1000);
-					var day = "0"+tstamp.getDate();
-					var month = "0"+tstamp.getMonth();
-					var date = day.slice(-2)+"."+month.slice(-2)+"."+tstamp.getFullYear();
-		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+value.refs.download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
+
+					if(file_origin == "sdcard" && value.refs.resource.includes(".gco")) {
+						img = value.refs.resource.replace(".gco", ".png");
+						download = value.refs.resource;
+					}
+					imgid = value.display.replace(".", "");
+
+					if(value.date != null) {
+						var tstamp = new Date(value.date*1000);
+						var day = "0"+tstamp.getDate();
+						var month = "0"+tstamp.getMonth();
+						var date = day.slice(-2)+"."+month.slice(-2)+"."+tstamp.getFullYear();
+					} else {
+						var date = "";
+					}
+		            $('#filestable > tbody:last-child').append('<tr onclick="selectFile(this, { display: \''+value.display+'\', name: \''+value.name+'\', origin: \''+value.origin+'\', path: \''+value.path+'\', type: \''+value.type+'\', refs: { resource: \''+value.refs.resource+'\', download: \''+download+'\' } })"><td><figure class="image is-128x128"><img src="'+img+'" id="thumb_'+imgid+'" class="thumb" onmousemove="zoomIn(\''+imgid+'\', event)" onmouseout="zoomOut(\''+imgid+'\')" onerror="this.src=\'img/placeholder.png\'"></figure><div class="overlay_wrapper"><div id="overlay_'+imgid+'" class="zoomoverlay" style="background-image: url(\'' +img+ '\')"></div></div></td><td>'+value.display+'</td><td>'+date+'<div class="file_buttons" id="fb_'+imgid+'"><span id="btn_load" class="button is-warning is-small" disabled onclick="loadprintFile(false)">load</span> <span id="btn_print" class="button is-success is-small" disabled onclick="loadprintFile(true)">print</span> <span id="btn_delete" class="button is-danger is-small" disabled onclick="deleteFile()">delete</span></div></td></tr>');
 				}
 	        });
 		}
@@ -335,7 +352,8 @@ function selectFile(selector, file) {
 }
 
 async function loadprintFile(print) {
-	var url = octo_ip+"/api/files/local/"+selectedfile.display;
+	console.log(selectedfile);
+	var url = octo_ip+"/api/files/"+selectedfile.origin+"/"+selectedfile.display;
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -423,5 +441,11 @@ function pcmds(sender) {
 	});		
 }
 
+function browse(dest) {
+	$('#tab_'+file_origin).removeClass("is-active");
+	$('#tab_'+dest).addClass("is-active");
+	file_origin = dest;
+	listFiles();
+}
 
 

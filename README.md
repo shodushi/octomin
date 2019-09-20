@@ -2,6 +2,9 @@
 
 webinterface for octoprint using native octoprint api.
 
+still under development, maybe some things are still buggy, but hey... give it a try.. :-)
+
+
 purely html and javascript/jquery, no node npm installations and dependencies, just place repo inside a webserver's doc-root running inside your network.
 
 edit config.js for your octoprint ip/port and your api key

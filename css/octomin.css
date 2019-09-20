@@ -106,3 +106,6 @@ tr.is-selected {
   cursor: grab;
   padding: 4px;
 }
+#filebrowser_head td {
+  border: none;
+}

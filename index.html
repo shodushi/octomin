@@ -110,19 +110,33 @@
 
 			  <div class="column is-three-quarters">
 			    <h2>Files & Folders</h2>
-			    	<table class="table is-fullwidth is-striped is-hoverable" id="filestable">
+			    	<table id="filebrowser_head" class="table is-fullwidth">
 			    		<thead>
-						    <tr>
-						      <th colspan="3">
+			    			<tr colspan="3">
+								<td>
+									<div class="tabs is-centered is-boxed">
+									  <ul>
+									    <li id="tab_local"><a onclick="browse('local')">local</a></li>
+									    <li id="tab_sdcard"><a onclick="browse('sdcard')">sdcard</a></li>
+									  </ul>
+									</div>
+								</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+						      <td colspan="3">
 								<div class="buttons" id="fileoperations">
 									<span id="btn_load" class="button is-warning" disabled onclick="loadprintFile(false)">load</span>
 									<span id="btn_print" class="button is-success" disabled onclick="loadprintFile(true)">print</span>
 									<span id="btn_cancel" class="button is-danger" disabled onclick="cancelJob()">cancel</span>
 									<span id="btn_delete" class="button is-danger" disabled onclick="deleteFile()">delete</span>
 								</div>
-						      </th>
+						      </td>
 						    </tr>
-						</thead>
+						</tbody>
+					</table>
+					<table class="table is-fullwidth is-striped is-hoverable" id="filestable">
 						<tbody id="filesbody">
 						</tbody>
 			    	</table>
