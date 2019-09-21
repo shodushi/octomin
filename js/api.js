@@ -46,6 +46,7 @@ $( document ).ready(function() {
 	getFiles();
 	printerstateTimer();
 	dropdownPrinterCmd();
+
 });
 
 function printerstateTimer() {
@@ -363,7 +364,7 @@ function selectFile(selector, file) {
 
 async function loadprintFile(print) {
 	console.log(selectedfile);
-	var url = octo_ip+"/api/files/"+selectedfile.origin+"/"+selectedfile.display;
+	var url = octo_ip+"/api/files/"+selectedfile.origin+"/"+selectedfile.path;
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
