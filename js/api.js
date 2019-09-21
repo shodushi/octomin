@@ -420,7 +420,6 @@ async function deleteFile() {
 }
 async function getJobInfo() {
 	OctoPrint.job.get().done(data => {
-		console.log(data);
 		job = data;
 	});
 }
