@@ -3,6 +3,7 @@ var selectedfile = {};
 var selectedfolder = "";
 var cam = "";
 var file_origin = "local";
+var job;
 
 $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textStatus, jqxhr) {
 	OctoPrint.options.baseurl = octo_ip;
@@ -27,6 +28,8 @@ $.getScript(octo_ip+'/static/webassets/packed_client.js', function(data, textSta
 	});
 
 	getSettings();
+	getConnectionState();
+	getJobInfo();
 });
 
 $( document ).ready(function() {
@@ -42,17 +45,16 @@ $( document ).ready(function() {
 	}
 	$( "#terminal" ).draggable();
 
-	getConnectionState();
 	getFiles();
 	printerstateTimer();
 	dropdownPrinterCmd();
-
 });
 
 function printerstateTimer() {
 	setTimeout(function(){
 		if(printerState.state != "Closed" && printerState.state != null) {
 			getPrinterState();
+			getJobInfo();
 			printerstateTimer();
 		}
 	}, 5000);
@@ -66,6 +68,11 @@ async function getSettings() {
 }
 
 function updateUI() {
+	if(job != null && printerState.state == "Printing") {
+		$('#jobinfo').html('('+job.progress.completion.toFixed(2)+'%)');
+	} else {
+		$('#jobinfo').html('');
+}
 	/*
 	if(previewimages != "yes") {
 		$(".image").css("display", "none");
@@ -410,6 +417,12 @@ async function deleteFile() {
 		getFiles();
 	};
 	xhr.send();
+}
+async function getJobInfo() {
+	OctoPrint.job.get().done(data => {
+		console.log(data);
+		job = data;
+	});
 }
 
 async function setExtruderTemp(temp) {

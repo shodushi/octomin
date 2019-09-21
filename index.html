@@ -160,7 +160,7 @@
 
 				      <div class="media-content">
 				        <p class="title is-4" id="printername"></p>
-				        <p class="subtitle is-6" id="connectionstatus"></p>
+				        <p class="subtitle is-6"><span id="connectionstatus"></span> <span id="jobinfo"></span></p>
 				      </div>
 				    </div>
 
@@ -172,7 +172,7 @@
 				    <div class="content" id="cardtools" style="display: none; border-top: 1px solid #C0C0C0; height: 270px;">
 						<div style="width: 25%; float: left; text-align: center;">
 							<p>Extruder:</p>
-							<input id="sliderExtruder" class="slider is-fullwidth is-danger is-small is-circle has-output" step="1" min="0" max="250" value="0" type="range" orient="vertical" onmouseup="setExtruderTemp(document.getElementById('sliderExtruder').value)"><output id="sliderextruderoutput" for="sliderExtruder">0</output> &deg;C
+							<input id="sliderExtruder" class="slider is-fullwidth is-danger is-small is-circle has-output" step="1" min="0" max="270" value="0" type="range" orient="vertical" onmouseup="setExtruderTemp(document.getElementById('sliderExtruder').value)"><output id="sliderextruderoutput" for="sliderExtruder">0</output> &deg;C
 						</div>
 						<div style="width: 25%; float: left; text-align: center;">
 							<p>&nbsp;</p>
@@ -180,7 +180,7 @@
 						</div>
 						<div style="width: 25%; float: left; text-align: center;">
 							<p>Bed:</p>
-							<input id="sliderBed" class="slider is-fullwidth is-info is-small is-circle has-output" step="1" min="0" max="90" value="0" type="range" orient="vertical" onmouseup="setBedTemp(document.getElementById('sliderBed').value)"><output id="sliderbedoutput" for="sliderBed">0</output> &deg;C
+							<input id="sliderBed" class="slider is-fullwidth is-info is-small is-circle has-output" step="1" min="0" max="100" value="0" type="range" orient="vertical" onmouseup="setBedTemp(document.getElementById('sliderBed').value)"><output id="sliderbedoutput" for="sliderBed">0</output> &deg;C
 						</div>
 						<div style="width: 25%; float: left; text-align: center;">
 							<p>&nbsp;</p>
