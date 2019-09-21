@@ -363,7 +363,6 @@ function selectFile(selector, file) {
 }
 
 async function loadprintFile(print) {
-	console.log(selectedfile);
 	var url = octo_ip+"/api/files/"+selectedfile.origin+"/"+selectedfile.path;
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
